@@ -1,21 +1,29 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sky Jump Challenge</title>
+    <title>Sky Jump Alien - Journey to the Stars</title>
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap" rel="stylesheet">
 </head>
+
 <body>
     <div id="game-container">
         <canvas id="gameCanvas"></canvas>
         <div id="ui-layer">
-            <div id="score-container">
-                <span id="score-label">Score:</span>
-                <span id="score-value">0</span>
+            <div id="hud">
+                <div class="hud-item">
+                    <span class="hud-label">Pontos:</span>
+                    <span id="score-value">0</span>
+                </div>
+                <div class="hud-item">
+                    <span class="hud-label">Recorde:</span>
+                    <span id="high-score-value">0</span>
+                </div>
             </div>
             <div id="start-screen" class="overlay">
                 <div class="glow"></div>
@@ -36,4 +44,5 @@
     </audio>
     <script src="game.js"></script>
 </body>
+
 </html>
