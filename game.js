@@ -41,6 +41,7 @@ let horizontalSpeed = INITIAL_HORIZONTAL_SPEED;
 let currentColor = { ...COLORS.EARTH };
 let animationId = null; // ID para controlar o loop
 const keys = {}; // Rastreador de teclas pressionadas
+let coins = parseInt(localStorage.getItem('skyJumpCoins')) || 0; // Sistema de Moedas
 
 // Exibir Recorde Inicial
 highScoreValue.textContent = highScore;
@@ -160,21 +161,48 @@ class Player {
 }
 
 class Platform {
-    constructor(y) {
+    constructor(y, isFirst = false) {
         this.width = 80;
-        this.height = 12; // Deixando as plataformas mais finas conforme pedido
+        this.height = 12;
         this.x = Math.random() * (CANVAS_WIDTH - this.width);
         this.y = y;
+
+        // Define se é uma plataforma de Boost (15% de chance, exceto a primeira)
+        this.type = (!isFirst && Math.random() < 0.15) ? 'BOOST' : 'NORMAL';
+
+        // Moedas (30% de chance de ter uma moeda se não for boost)
+        this.hasCoin = (!isFirst && this.type === 'NORMAL' && Math.random() < 0.3);
+        this.coinCollected = false;
     }
 
     draw() {
         const drawY = this.y - cameraY;
-        if (platformImg.complete && platformImg.naturalWidth !== 0) {
-            ctx.drawImage(platformImg, this.x, drawY, this.width, this.height);
-        } else {
-            // Retângulo simples para máxima compatibilidade
-            ctx.fillStyle = '#ffffff';
+
+        // Desenha Plataforma
+        ctx.fillStyle = (this.type === 'BOOST') ? '#ffeb3b' : '#ffffff';
+        if (this.type === 'BOOST') {
+            // Desenha detalhe do trampolim
             ctx.fillRect(this.x, drawY, this.width, this.height);
+            ctx.fillStyle = '#f44336';
+            ctx.fillRect(this.x + 10, drawY - 4, this.width - 20, 4);
+        } else {
+            ctx.fillRect(this.x, drawY, this.width, this.height);
+        }
+
+        // Desenha Moeda
+        if (this.hasCoin && !this.coinCollected) {
+            ctx.fillStyle = '#ffd700';
+            ctx.beginPath();
+            ctx.arc(this.x + this.width / 2, drawY - 15, 7, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#b8860b';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            // Brilho da moeda
+            ctx.fillStyle = 'white';
+            ctx.beginPath();
+            ctx.arc(this.x + this.width / 2 - 2, drawY - 17, 2, 0, Math.PI * 2);
+            ctx.fill();
         }
     }
 }
@@ -227,12 +255,17 @@ function spawnPlatforms() {
 function checkCollisions() {
     if (player && player.vy > 0) {
         platforms.forEach(p => {
+            // Colisão com Plataforma
             if (player.x + player.width > p.x &&
                 player.x < p.x + p.width &&
                 player.y + player.height > p.y &&
                 player.y + player.height < p.y + p.height + player.vy) {
 
-                player.jump();
+                if (p.type === 'BOOST') {
+                    player.vy = JUMP_FORCE * 1.8; // Salto muito mais alto
+                } else {
+                    player.jump();
+                }
 
                 const currentScore = Math.floor(Math.abs(player.y - (CANVAS_HEIGHT - 100)) / 10);
                 if (currentScore > score) {
@@ -247,8 +280,27 @@ function checkCollisions() {
                     }
                 }
             }
+
+            // Coleta de Moedas
+            if (p.hasCoin && !p.coinCollected) {
+                const coinX = p.x + p.width / 2;
+                const coinY = p.y - 15;
+                const dist = Math.sqrt(Math.pow(player.x + player.width / 2 - coinX, 2) + Math.pow(player.y + player.height / 2 - coinY, 2));
+
+                if (dist < 40) {
+                    p.coinCollected = true;
+                    coins++;
+                    updateCoinUI();
+                    localStorage.setItem('skyJumpCoins', coins);
+                }
+            }
         });
     }
+}
+
+function updateCoinUI() {
+    const coinDisplay = document.getElementById('coin-count');
+    if (coinDisplay) coinDisplay.textContent = coins;
 }
 
 let player = null;
@@ -294,11 +346,12 @@ function startGame() {
 
     // Initial platforms
     for (let i = 0; i < 7; i++) {
-        platforms.push(new Platform(CANVAS_HEIGHT - (i * 100) - 50));
+        platforms.push(new Platform(CANVAS_HEIGHT - (i * 100) - 50, i === 0));
     }
     platforms[0].x = player.x - 15;
 
     gameActive = true;
+    updateCoinUI();
     startScreen.classList.add('hidden');
     gameOverScreen.classList.add('hidden');
 
