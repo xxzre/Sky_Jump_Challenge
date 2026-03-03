@@ -1,0 +1,143 @@
+:root {
+    --primary-color: #00bcd4;
+    --background-accent: rgba(255, 255, 255, 0.15);
+    --text-color: #ffffff;
+    --font-family: 'Outfit', sans-serif;
+}
+
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    font-family: var(--font-family);
+    color: var(--text-color);
+}
+
+#game-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+canvas {
+    background: transparent;
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.4);
+    display: block;
+}
+
+#ui-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#score-container {
+    margin-top: 20px;
+    background: var(--background-accent);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 10px 30px;
+    border-radius: 50px;
+    font-size: 1.5rem;
+    font-weight: 700;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    pointer-events: auto;
+    transition: opacity 0.4s ease, visibility 0.4s ease;
+    z-index: 10;
+}
+
+.overlay.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+h1 {
+    font-size: 4rem;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    letter-spacing: 5px;
+    background: linear-gradient(to bottom, #ffffff, #00bcd4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.5));
+}
+
+p {
+    font-size: 1.2rem;
+    margin-bottom: 30px;
+    opacity: 0.8;
+}
+
+button {
+    background: var(--primary-color);
+    border: none;
+    padding: 15px 45px;
+    border-radius: 50px;
+    color: white;
+    font-family: inherit;
+    font-size: 1.2rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.3s ease;
+    box-shadow: 0 10px 25px rgba(0, 188, 212, 0.4);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+button:hover {
+    transform: translateY(-5px) scale(1.05);
+    background: #00d2ff;
+    box-shadow: 0 15px 35px rgba(0, 188, 212, 0.6);
+}
+
+button:active {
+    transform: translateY(0) scale(1);
+}
+
+#final-score {
+    font-size: 2rem;
+    margin-bottom: 30px;
+    font-weight: 700;
+}
+
+@media (max-width: 600px) {
+    h1 {
+        font-size: 2.5rem;
+    }
+    
+    #score-container {
+        font-size: 1.2rem;
+        padding: 5px 20px;
+    }
+}

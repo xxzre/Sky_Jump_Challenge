@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sky Jump Challenge</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="game-container">
+        <canvas id="gameCanvas"></canvas>
+        <div id="ui-layer">
+            <div id="score-container">
+                <span id="score-label">Score:</span>
+                <span id="score-value">0</span>
+            </div>
+            <div id="start-screen" class="overlay">
+                <h1>Sky Jump</h1>
+                <p>Use as setas ou clique para mover</p>
+                <button id="start-button">Começar</button>
+            </div>
+            <div id="game-over-screen" class="overlay hidden">
+                <h1>Game Over</h1>
+                <p>Você caiu!</p>
+                <div id="final-score">Pontuação: 0</div>
+                <button id="restart-button">Tentar Novamente</button>
+            </div>
+        </div>
+    </div>
+    <script src="game.js"></script>
+</body>
+</html>
