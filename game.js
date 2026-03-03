@@ -40,6 +40,7 @@ let gravity = INITIAL_GRAVITY;
 let horizontalSpeed = INITIAL_HORIZONTAL_SPEED;
 let currentColor = { ...COLORS.EARTH };
 let animationId = null; // ID para controlar o loop
+const keys = {}; // Rastreador de teclas pressionadas
 
 // Exibir Recorde Inicial
 highScoreValue.textContent = highScore;
@@ -70,6 +71,15 @@ class Player {
         this.vy += gravity;
         this.y += this.vy;
 
+        // Lógica de movimento baseada nas teclas pressionadas
+        if (keys['ArrowLeft'] || keys['a'] || keys['A']) {
+            this.vx = -horizontalSpeed;
+        } else if (keys['ArrowRight'] || keys['d'] || keys['D']) {
+            this.vx = horizontalSpeed;
+        } else {
+            this.vx = 0;
+        }
+
         // Game over check
         if (this.y - cameraY > CANVAS_HEIGHT) {
             endGame();
@@ -78,21 +88,64 @@ class Player {
 
     draw() {
         const drawY = this.y - cameraY;
-        if (playerImg.complete && playerImg.naturalWidth !== 0) {
-            ctx.drawImage(playerImg, this.x, drawY, this.width, this.height);
-        } else {
-            // Alien Verde conforme GDD (#00FF00) - Fallback robusto
-            ctx.fillStyle = '#00FF00';
-            ctx.beginPath();
-            ctx.arc(this.x + 22, drawY + 22, 20, 0, Math.PI * 2);
-            ctx.fill();
-            // Olhos
-            ctx.fillStyle = 'black';
-            ctx.beginPath();
-            ctx.arc(this.x + 15, drawY + 18, 5, 0, Math.PI * 2);
-            ctx.arc(this.x + 30, drawY + 18, 5, 0, Math.PI * 2);
-            ctx.fill();
-        }
+
+        ctx.save();
+        ctx.translate(this.x + this.width / 2, drawY + this.height / 2);
+
+        // Efeito de sombra leve abaixo do alien
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+        ctx.beginPath();
+        ctx.ellipse(0, 25, 15, 5, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Corpo/Cabeça do Alien (Verde Vibrante)
+        const gradient = ctx.createRadialGradient(-5, -5, 5, 0, 0, 25);
+        gradient.addColorStop(0, '#a2ff00'); // Brilho interno
+        gradient.addColorStop(1, '#4CAF50'); // Cor base
+
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 20, 24, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Detalhe da borda para dar profundidade
+        ctx.strokeStyle = '#2e7d32';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Olhos Grandes e Pretos (Estilo Alien Clássico)
+        ctx.fillStyle = '#1a1a1a';
+
+        // Olho Esquerdo
+        ctx.save();
+        ctx.translate(-10, -2);
+        ctx.rotate(Math.PI / 6);
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 6, 11, 0, 0, Math.PI * 2);
+        ctx.fill();
+        // Brilho no Olho
+        ctx.fillStyle = 'white';
+        ctx.beginPath();
+        ctx.arc(2, -4, 2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+
+        // Olho Direito
+        ctx.save();
+        ctx.fillStyle = '#1a1a1a';
+        ctx.translate(10, -2);
+        ctx.rotate(-Math.PI / 6);
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 6, 11, 0, 0, Math.PI * 2);
+        ctx.fill();
+        // Brilho no Olho
+        ctx.fillStyle = 'white';
+        ctx.beginPath();
+        ctx.arc(-2, -4, 2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+
+        ctx.restore();
     }
 
     jump() {
@@ -103,7 +156,7 @@ class Player {
 class Platform {
     constructor(y) {
         this.width = 80;
-        this.height = 25; // Aumentado para não ficar muito fina
+        this.height = 12; // Deixando as plataformas mais finas conforme pedido
         this.x = Math.random() * (CANVAS_WIDTH - this.width);
         this.y = y;
     }
@@ -256,12 +309,11 @@ function endGame() {
 
 // Controles
 window.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowLeft') player.vx = -horizontalSpeed;
-    if (e.key === 'ArrowRight') player.vx = horizontalSpeed;
+    keys[e.key] = true;
 });
 
 window.addEventListener('keyup', (e) => {
-    if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') player.vx = 0;
+    keys[e.key] = false;
 });
 
 canvas.addEventListener('mousedown', (e) => {
