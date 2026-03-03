@@ -46,9 +46,9 @@ highScoreValue.textContent = highScore;
 
 // Assets
 const playerImg = new Image();
-playerImg.src = 'assets/player.png';
+playerImg.src = 'assets/alien_sprite_1772562800284.png';
 const platformImg = new Image();
-platformImg.src = 'assets/platform.png';
+platformImg.src = 'assets/platform_sprite_1772562823010.png';
 
 class Player {
     constructor() {
