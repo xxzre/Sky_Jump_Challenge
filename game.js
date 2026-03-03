@@ -39,6 +39,7 @@ let cameraY = 0;
 let gravity = INITIAL_GRAVITY;
 let horizontalSpeed = INITIAL_HORIZONTAL_SPEED;
 let currentColor = { ...COLORS.EARTH };
+let animationId = null; // ID para controlar o loop
 
 // Exibir Recorde Inicial
 highScoreValue.textContent = highScore;
@@ -80,16 +81,16 @@ class Player {
         if (playerImg.complete && playerImg.naturalWidth !== 0) {
             ctx.drawImage(playerImg, this.x, drawY, this.width, this.height);
         } else {
-            // Alien Verde conforme GDD (#00FF00)
+            // Alien Verde conforme GDD (#00FF00) - Fallback robusto
             ctx.fillStyle = '#00FF00';
             ctx.beginPath();
-            ctx.ellipse(this.x + 22, drawY + 22, 18, 22, 0, 0, Math.PI * 2);
+            ctx.arc(this.x + 22, drawY + 22, 20, 0, Math.PI * 2);
             ctx.fill();
             // Olhos
             ctx.fillStyle = 'black';
             ctx.beginPath();
-            ctx.ellipse(this.x + 14, drawY + 16, 5, 8, Math.PI / 4, 0, Math.PI * 2);
-            ctx.ellipse(this.x + 30, drawY + 16, 5, 8, -Math.PI / 4, 0, Math.PI * 2);
+            ctx.arc(this.x + 15, drawY + 18, 5, 0, Math.PI * 2);
+            ctx.arc(this.x + 30, drawY + 18, 5, 0, Math.PI * 2);
             ctx.fill();
         }
     }
@@ -112,10 +113,9 @@ class Platform {
         if (platformImg.complete && platformImg.naturalWidth !== 0) {
             ctx.drawImage(platformImg, this.x, drawY, this.width, this.height);
         } else {
+            // Retângulo simples para máxima compatibilidade
             ctx.fillStyle = '#ffffff';
-            ctx.beginPath();
-            ctx.roundRect(this.x, drawY, this.width, this.height, 5);
-            ctx.fill();
+            ctx.fillRect(this.x, drawY, this.width, this.height);
         }
     }
 }
@@ -126,21 +126,18 @@ function lerp(start, end, amt) {
 }
 
 function updateColors() {
-    let target;
     let factor = 0;
 
     if (score <= 500) {
-        target = COLORS.SKY;
-        factor = score / 500; // 0 a 500 -> Transição Marrom p/ Azul Claro
-        currentColor.r = lerp(COLORS.EARTH.r, COLORS.SKY.r, factor);
-        currentColor.g = lerp(COLORS.EARTH.g, COLORS.SKY.g, factor);
-        currentColor.b = lerp(COLORS.EARTH.b, COLORS.SKY.b, factor);
+        factor = score / 500;
+        currentColor.r = Math.floor(lerp(COLORS.EARTH.r, COLORS.SKY.r, factor));
+        currentColor.g = Math.floor(lerp(COLORS.EARTH.g, COLORS.SKY.g, factor));
+        currentColor.b = Math.floor(lerp(COLORS.EARTH.b, COLORS.SKY.b, factor));
     } else if (score <= 1000) {
-        target = COLORS.SPACE;
-        factor = (score - 500) / 500; // 501 a 1000 -> Transição Azul Claro p/ Azul Escuro
-        currentColor.r = lerp(COLORS.SKY.r, COLORS.SPACE.r, factor);
-        currentColor.g = lerp(COLORS.SKY.g, COLORS.SPACE.g, factor);
-        currentColor.b = lerp(COLORS.SKY.b, COLORS.SPACE.b, factor);
+        factor = (score - 500) / 500;
+        currentColor.r = Math.floor(lerp(COLORS.SKY.r, COLORS.SPACE.r, factor));
+        currentColor.g = Math.floor(lerp(COLORS.SKY.g, COLORS.SPACE.g, factor));
+        currentColor.b = Math.floor(lerp(COLORS.SKY.b, COLORS.SPACE.b, factor));
     } else {
         currentColor = { ...COLORS.SPACE };
     }
@@ -157,18 +154,17 @@ function spawnPlatforms() {
 
     const highest = platforms[platforms.length - 1];
     if (highest.y > cameraY - 100) {
-        // Gaps increase with score
         const gap = Math.min(80 + (score / 12), 170);
         platforms.push(new Platform(highest.y - gap));
     }
 
-    if (platforms[0].y - cameraY > CANVAS_HEIGHT) {
+    if (platforms.length > 0 && platforms[0].y - cameraY > CANVAS_HEIGHT + 100) {
         platforms.shift();
     }
 }
 
 function checkCollisions() {
-    if (player.vy > 0) {
+    if (player && player.vy > 0) {
         platforms.forEach(p => {
             if (player.x + player.width > p.x &&
                 player.x < p.x + p.width &&
@@ -177,7 +173,6 @@ function checkCollisions() {
 
                 player.jump();
 
-                // Score based on height
                 const currentScore = Math.floor(Math.abs(player.y - (CANVAS_HEIGHT - 100)) / 10);
                 if (currentScore > score) {
                     score = currentScore;
@@ -195,7 +190,7 @@ function checkCollisions() {
     }
 }
 
-let player = new Player();
+let player = null;
 
 function gameLoop() {
     if (!gameActive) return;
@@ -204,23 +199,29 @@ function gameLoop() {
     ctx.fillStyle = `rgb(${currentColor.r}, ${currentColor.g}, ${currentColor.b})`;
     ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-    player.update();
+    if (player) {
+        player.update();
 
-    // Smooth camera
-    if (player.y < cameraY + CANVAS_HEIGHT * 0.4) {
-        cameraY = player.y - CANVAS_HEIGHT * 0.4;
+        if (player.y < cameraY + CANVAS_HEIGHT * 0.4) {
+            cameraY = player.y - CANVAS_HEIGHT * 0.4;
+        }
+
+        checkCollisions();
+        spawnPlatforms();
+
+        platforms.forEach(p => p.draw());
+        player.draw();
     }
 
-    checkCollisions();
-    spawnPlatforms();
-
-    platforms.forEach(p => p.draw());
-    player.draw();
-
-    requestAnimationFrame(gameLoop);
+    animationId = requestAnimationFrame(gameLoop);
 }
 
 function startGame() {
+    // Parar qualquer loop anterior
+    if (animationId) {
+        cancelAnimationFrame(animationId);
+    }
+
     score = 0;
     cameraY = 0;
     gravity = INITIAL_GRAVITY;
@@ -240,7 +241,9 @@ function startGame() {
     startScreen.classList.add('hidden');
     gameOverScreen.classList.add('hidden');
 
-    bgMusic.play().catch(() => console.log("Som aguardando interação"));
+    if (bgMusic) {
+        bgMusic.play().catch(() => console.log("Som aguardando interação"));
+    }
 
     gameLoop();
 }
