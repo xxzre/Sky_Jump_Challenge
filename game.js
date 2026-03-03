@@ -47,7 +47,7 @@ highScoreValue.textContent = highScore;
 
 // Assets
 const playerImg = new Image();
-playerImg.src = 'assets/pig_alien.png'; // Nova skin: Porco de Terno
+playerImg.src = 'assets/Porquinho_da_Sorte.png'; // Nova skin: Porco de Terno
 const platformImg = new Image();
 platformImg.src = 'assets/platform_sprite_1772562823010.png';
 
