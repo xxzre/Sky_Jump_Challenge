@@ -230,6 +230,31 @@ p {
     margin-top: 10px;
 }
 
+.lang-switcher {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    gap: 10px;
+    background: var(--glass);
+    padding: 5px 10px;
+    border-radius: 20px;
+    border: 1px solid var(--glass-border);
+}
+
+.lang-opt {
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 800;
+    opacity: 0.4;
+    transition: opacity 0.2s;
+}
+
+.lang-opt.active {
+    opacity: 1;
+    color: var(--accent);
+}
+
 /* Animations */
 @keyframes float {
     0% {

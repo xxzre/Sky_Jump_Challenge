@@ -30,29 +30,36 @@
 
         <!-- Start Screen -->
         <div id="start-screen" class="ui-layer">
-            <h1 class="floating">Sky Jump Alien</h1>
-            <p>Journey to the Stars</p>
-            <div class="menu-buttons">
-                <button id="start-button" class="btn">Play Now</button>
-                <button id="shop-button" class="btn secondary">Item Shop</button>
+            <div class="lang-switcher">
+                <span id="lang-pt" class="lang-opt active">PT</span>
+                <span id="lang-en" class="lang-opt">EN</span>
             </div>
-            <div class="high-score-label">Best: <span id="high-score-value">0</span></div>
+            <h1 class="floating" data-t="title">Sky Jump</h1>
+            <p data-t="subtitle">Lucky Pig's Cosmic Journey</p>
+            <div class="menu-buttons">
+                <button id="start-button" class="btn" data-t="play">Play Now</button>
+                <button id="shop-button" class="btn secondary" data-t="shop">Item Shop</button>
+            </div>
+            <div class="high-score-label"><span data-t="best">Best</span>: <span id="high-score-value">0</span></div>
         </div>
 
         <!-- Shop Screen -->
         <div id="shop-screen" class="ui-layer hidden">
-            <h1>Alien Shop</h1>
+            <h1 data-t="shop_title">Alien Shop</h1>
             <div id="skin-list" class="skin-container">
                 <!-- Skins will be injected here via JS -->
             </div>
-            <button id="close-shop" class="btn secondary">Back to Menu</button>
+            <button id="close-shop" class="btn secondary" data-t="back">Back to Menu</button>
         </div>
 
         <!-- Game Over Screen -->
         <div id="game-over-screen" class="ui-layer hidden">
-            <h1>Game Over</h1>
+            <h1 data-t="game_over">Game Over</h1>
             <p id="final-score">Score: 0</p>
-            <button id="restart-button" class="btn">New Flight</button>
+            <div class="menu-buttons">
+                <button id="restart-button" class="btn" data-t="restart">New Flight</button>
+                <button id="menu-button" class="btn secondary" data-t="menu">Main Menu</button>
+            </div>
         </div>
     </div>
 
