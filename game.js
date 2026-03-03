@@ -1,190 +1,169 @@
 /**
- * Sky Jump Challenge - Core Logic
- * Canvas-based Infinite Jumper
+ * 🛸 Sky Jump: Alien Edition
+ * Lógica baseada na Documentação Técnica
  */
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
-const scoreElement = document.getElementById('score-value');
-const finalScoreElement = document.getElementById('final-score');
+const scoreValue = document.getElementById('score-value');
+const finalScore = document.getElementById('final-score');
 const startScreen = document.getElementById('start-screen');
 const gameOverScreen = document.getElementById('game-over-screen');
 const startButton = document.getElementById('start-button');
 const restartButton = document.getElementById('restart-button');
+const bgMusic = document.getElementById('bg-music');
 
-// Game constants
-const GRAVITY = 0.4;
-const JUMP_FORCE = -12;
-const BASE_PLATFORM_SPEED = 0; // Platforms only move down as camera moves
-const HORIZONTAL_SPEED = 7;
+// Configurações Iniciais
 const CANVAS_WIDTH = 400;
 const CANVAS_HEIGHT = 600;
+const INITIAL_GRAVITY = 0.35;
+const INITIAL_HORIZONTAL_SPEED = 6;
+const JUMP_FORCE = -11;
+const SCORE_STEP = 200;
+const INCREMENT = 0.05;
 
-// Game state
+// Estado do Jogo
 let score = 0;
-let highScore = 0;
 let gameActive = false;
 let platforms = [];
-let player;
 let cameraY = 0;
-let speedMultiplier = 1;
+let gravity = INITIAL_GRAVITY;
+let horizontalSpeed = INITIAL_HORIZONTAL_SPEED;
+let bgColor = '#8B4513'; // Cor inicial: Marrom
 
 // Assets
-const assets = {
-    player: new Image(),
-    platform: new Image(),
-    background: new Image(),
-    jumpSound: null,
-    gameOverSound: null
-};
-
-// Setup paths (using local assets folder)
-assets.player.src = 'assets/player.png';
-assets.platform.src = 'assets/platform.png';
-assets.background.src = 'assets/background.png';
-
-// Fallback colors if images fail
-const colors = {
-    player: '#00bcd4',
-    platform: '#ffffff',
-    bgStart: '#1e3c72',
-    bgEnd: '#2a5298'
-};
+const playerImg = new Image();
+playerImg.src = 'assets/player.png';
+const platformImg = new Image();
+platformImg.src = 'assets/platform.png';
 
 class Player {
     constructor() {
-        this.width = 40;
-        this.height = 40;
+        this.width = 45;
+        this.height = 45;
         this.x = CANVAS_WIDTH / 2 - this.width / 2;
         this.y = CANVAS_HEIGHT - 100;
         this.vx = 0;
         this.vy = 0;
-        this.jumpForce = JUMP_FORCE;
     }
 
     update() {
-        // Horizontal movement
         this.x += this.vx;
 
         // Screen wrap
         if (this.x + this.width < 0) this.x = CANVAS_WIDTH;
         if (this.x > CANVAS_WIDTH) this.x = -this.width;
 
-        // Gravity
-        this.vy += GRAVITY;
+        this.vy += gravity;
         this.y += this.vy;
 
-        // Death condition
+        // Game over check
         if (this.y - cameraY > CANVAS_HEIGHT) {
             endGame();
         }
     }
 
     draw() {
-        ctx.save();
         const drawY = this.y - cameraY;
-        
-        if (assets.player.complete && assets.player.naturalWidth !== 0) {
-            ctx.drawImage(assets.player, this.x, drawY, this.width, this.height);
+        if (playerImg.complete && playerImg.naturalWidth !== 0) {
+            ctx.drawImage(playerImg, this.x, drawY, this.width, this.height);
         } else {
-            // Draw fallback rounded player
-            ctx.fillStyle = colors.player;
+            // Fallback: Alien Verde (Canvas)
+            ctx.fillStyle = '#4CAF50';
+            // Cabeça
             ctx.beginPath();
-            ctx.roundRect(this.x, drawY, this.width, this.height, 10);
+            ctx.ellipse(this.x + 22, drawY + 22, 20, 22, 0, 0, Math.PI * 2);
             ctx.fill();
-            // Eyes
+            // Olhos Grandes
+            ctx.fillStyle = 'black';
+            ctx.beginPath();
+            ctx.ellipse(this.x + 12, drawY + 15, 6, 8, Math.PI / 4, 0, Math.PI * 2);
+            ctx.ellipse(this.x + 32, drawY + 15, 6, 8, -Math.PI / 4, 0, Math.PI * 2);
+            ctx.fill();
+            // Brilho nos olhos
             ctx.fillStyle = 'white';
             ctx.beginPath();
-            ctx.arc(this.x + 10, drawY + 15, 4, 0, Math.PI * 2);
-            ctx.arc(this.x + 30, drawY + 15, 4, 0, Math.PI * 2);
+            ctx.arc(this.x + 14, drawY + 12, 2, 0, Math.PI * 2);
+            ctx.arc(this.x + 30, drawY + 12, 2, 0, Math.PI * 2);
             ctx.fill();
         }
-        ctx.restore();
     }
 
     jump() {
-        this.vy = this.jumpForce;
+        this.vy = JUMP_FORCE;
     }
 }
 
 class Platform {
-    constructor(y, type = 'normal') {
-        this.width = 70;
-        this.height = 15;
+    constructor(y) {
+        this.width = 75;
+        this.height = 18;
         this.x = Math.random() * (CANVAS_WIDTH - this.width);
         this.y = y;
-        this.type = type;
     }
 
     draw() {
         const drawY = this.y - cameraY;
-        if (assets.platform.complete && assets.platform.naturalWidth !== 0) {
-            ctx.drawImage(assets.platform, this.x, drawY, this.width, this.height);
+        if (platformImg.complete && platformImg.naturalWidth !== 0) {
+            ctx.drawImage(platformImg, this.x, drawY, this.width, this.height);
         } else {
-            // Draw fallback platform
-            ctx.fillStyle = colors.platform;
-            ctx.shadowBlur = 10;
-            ctx.shadowColor = 'rgba(255, 255, 255, 0.5)';
+            // Fallback: Plataforma Estilizada
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+            ctx.strokeStyle = 'rgba(255, 255, 255, 1)';
+            ctx.lineWidth = 2;
             ctx.beginPath();
             ctx.roundRect(this.x, drawY, this.width, this.height, 5);
             ctx.fill();
-            ctx.shadowBlur = 0;
+            ctx.stroke();
         }
     }
 }
 
-function initGame() {
-    canvas.width = CANVAS_WIDTH;
-    canvas.height = CANVAS_HEIGHT;
-    
-    player = new Player();
-    platforms = [];
-    score = 0;
-    cameraY = 0;
-    speedMultiplier = 1;
-    scoreElement.textContent = '0';
-
-    // Starting platforms
-    for (let i = 0; i < 7; i++) {
-        platforms.push(new Platform(CANVAS_HEIGHT - (i * 100) - 50));
+function updateColors() {
+    if (score <= 500) {
+        bgColor = '#8B4513'; // Marrom Solo
+    } else if (score <= 1000) {
+        bgColor = '#87CEEB'; // Azul Claro Céu
+    } else {
+        bgColor = '#000033'; // Azul Escuro Espacial
     }
-    
-    // Ensure first platform is under player
-    platforms[0].x = player.x - 15;
+}
+
+function updateDifficulty() {
+    const level = Math.floor(score / SCORE_STEP);
+    gravity = INITIAL_GRAVITY + (level * INCREMENT);
+    horizontalSpeed = INITIAL_HORIZONTAL_SPEED + (level * (INCREMENT * 10));
 }
 
 function spawnPlatforms() {
-    const highestPlatformY = platforms[platforms.length - 1].y;
+    if (platforms.length === 0) return;
     
-    // Maintain a buffer of platforms above the camera
-    if (highestPlatformY > cameraY - 100) {
-        // Difficulty scaling: platforms get further apart
-        const gap = Math.min(120 + (score / 200) * 10, 180);
-        platforms.push(new Platform(highestPlatformY - gap));
+    const highest = platforms[platforms.length - 1];
+    if (highest.y > cameraY - 100) {
+        const gap = Math.min(80 + (score / 10), 160);
+        platforms.push(new Platform(highest.y - gap));
     }
 
-    // Remove off-screen platforms
     if (platforms[0].y - cameraY > CANVAS_HEIGHT) {
         platforms.shift();
     }
 }
 
 function checkCollisions() {
-    if (player.vy > 0) { // Only collide when falling
+    if (player.vy > 0) {
         platforms.forEach(p => {
-            if (player.x + player.width > p.x && 
+            if (player.x + player.width > p.x &&
                 player.x < p.x + p.width &&
                 player.y + player.height > p.y &&
                 player.y + player.height < p.y + p.height + player.vy) {
                 
-                player.y = p.y - player.height;
                 player.jump();
                 
-                // Update score based on height reached
-                const currentHeight = Math.floor(Math.abs(player.y - (CANVAS_HEIGHT - 100)) / 10);
-                if (currentHeight > score) {
-                    score = currentHeight;
-                    scoreElement.textContent = score;
+                // Score based on height
+                const currentScore = Math.floor(Math.abs(player.y - (CANVAS_HEIGHT - 100)) / 10);
+                if (currentScore > score) {
+                    score = currentScore;
+                    scoreValue.textContent = score;
                     updateDifficulty();
                 }
             }
@@ -192,97 +171,94 @@ function checkCollisions() {
     }
 }
 
-function updateDifficulty() {
-    // Escalonamento: V_atual = V_base + (Score/200 * Incremento)
-    // In our case, higher score makes jumping slightly harder by increasing speed and gaps
-    speedMultiplier = 1 + (score / 200) * 0.1;
-}
+let player = new Player();
 
-function update() {
+function gameLoop() {
     if (!gameActive) return;
+
+    ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+    
+    updateColors();
+    ctx.fillStyle = bgColor;
+    ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
     player.update();
     
-    // Camera follow
+    // Smooth camera
     if (player.y < cameraY + CANVAS_HEIGHT * 0.4) {
         cameraY = player.y - CANVAS_HEIGHT * 0.4;
     }
 
     checkCollisions();
     spawnPlatforms();
-    
-    draw();
-    requestAnimationFrame(update);
-}
-
-function draw() {
-    // Background gradient
-    const gradient = ctx.createLinearGradient(0, 0, 0, CANVAS_HEIGHT);
-    gradient.addColorStop(0, colors.bgStart);
-    gradient.addColorStop(1, colors.bgEnd);
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-
-    // Dynamic sky bg if loaded
-    if (assets.background.complete && assets.background.naturalWidth !== 0) {
-        // Parallax background
-        const bgY = (cameraY * 0.5) % CANVAS_HEIGHT;
-        ctx.drawImage(assets.background, 0, -bgY, CANVAS_WIDTH, CANVAS_HEIGHT);
-        ctx.drawImage(assets.background, 0, -bgY + CANVAS_HEIGHT, CANVAS_WIDTH, CANVAS_HEIGHT);
-    }
 
     platforms.forEach(p => p.draw());
     player.draw();
+
+    requestAnimationFrame(gameLoop);
 }
 
 function startGame() {
-    initGame();
+    score = 0;
+    cameraY = 0;
+    gravity = INITIAL_GRAVITY;
+    horizontalSpeed = INITIAL_HORIZONTAL_SPEED;
+    scoreValue.textContent = '0';
+    platforms = [];
+    player = new Player();
+
+    // Initial platforms
+    for (let i = 0; i < 7; i++) {
+        platforms.push(new Platform(CANVAS_HEIGHT - (i * 100) - 50));
+    }
+    platforms[0].x = player.x - 15;
+
     gameActive = true;
     startScreen.classList.add('hidden');
     gameOverScreen.classList.add('hidden');
-    update();
+    
+    // Music logic
+    bgMusic.play().catch(e => console.log("Aguardando interação para áudio"));
+    
+    gameLoop();
 }
 
 function endGame() {
     gameActive = false;
     gameOverScreen.classList.remove('hidden');
-    finalScoreElement.textContent = `Pontuação: ${score}`;
-    if (score > highScore) highScore = score;
+    finalScore.textContent = `Pontuação: ${score}`;
 }
 
-// Controls
+// Controles
 window.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowLeft') player.vx = -HORIZONTAL_SPEED;
-    if (e.key === 'ArrowRight') player.vx = HORIZONTAL_SPEED;
+    if (e.key === 'ArrowLeft') player.vx = -horizontalSpeed;
+    if (e.key === 'ArrowRight') player.vx = horizontalSpeed;
 });
 
 window.addEventListener('keyup', (e) => {
     if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') player.vx = 0;
 });
 
-// Touch/Mouse controls for horizontal movement
+// Mobile/Click
 canvas.addEventListener('mousedown', (e) => {
     const rect = canvas.getBoundingClientRect();
-    const clickX = e.clientX - rect.left;
-    if (clickX < CANVAS_WIDTH / 2) player.vx = -HORIZONTAL_SPEED;
-    else player.vx = HORIZONTAL_SPEED;
+    const x = e.clientX - rect.left;
+    player.vx = (x < CANVAS_WIDTH / 2) ? -horizontalSpeed : horizontalSpeed;
 });
-
 canvas.addEventListener('mouseup', () => player.vx = 0);
 
 canvas.addEventListener('touchstart', (e) => {
     e.preventDefault();
     const rect = canvas.getBoundingClientRect();
-    const touchX = e.touches[0].clientX - rect.left;
-    if (touchX < CANVAS_WIDTH / 2) player.vx = -HORIZONTAL_SPEED;
-    else player.vx = HORIZONTAL_SPEED;
+    const x = e.touches[0].clientX - rect.left;
+    player.vx = (x < CANVAS_WIDTH / 2) ? -horizontalSpeed : horizontalSpeed;
 }, {passive: false});
-
 canvas.addEventListener('touchend', () => player.vx = 0);
 
 startButton.addEventListener('click', startGame);
 restartButton.addEventListener('click', startGame);
 
-// Initialization
-initGame();
-draw(); // Initial draw for the start screen background
+// Init Canvas size
+canvas.width = CANVAS_WIDTH;
+canvas.height = CANVAS_HEIGHT;
+
