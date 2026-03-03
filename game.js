@@ -46,7 +46,7 @@ highScoreValue.textContent = highScore;
 
 // Assets
 const playerImg = new Image();
-playerImg.src = 'assets/alien_sprite_1772562800284.png';
+playerImg.src = 'assets/alien_no_bg_v2_1772566443003.png';
 const platformImg = new Image();
 platformImg.src = 'assets/platform_sprite_1772562823010.png';
 
@@ -102,8 +102,8 @@ class Player {
 
 class Platform {
     constructor(y) {
-        this.width = 75;
-        this.height = 15;
+        this.width = 80;
+        this.height = 25; // Aumentado para não ficar muito fina
         this.x = Math.random() * (CANVAS_WIDTH - this.width);
         this.y = y;
     }
