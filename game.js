@@ -47,14 +47,14 @@ highScoreValue.textContent = highScore;
 
 // Assets
 const playerImg = new Image();
-playerImg.src = 'assets/alien_no_bg_v2_1772566443003.png';
+playerImg.src = 'assets/pig_alien.png'; // Nova skin: Porco de Terno
 const platformImg = new Image();
 platformImg.src = 'assets/platform_sprite_1772562823010.png';
 
 class Player {
     constructor() {
-        this.width = 45;
-        this.height = 45;
+        this.width = 55; // Aumentado para melhor visibilidade da skin
+        this.height = 55;
         this.x = CANVAS_WIDTH / 2 - this.width / 2;
         this.y = CANVAS_HEIGHT - 100;
         this.vx = 0;
@@ -89,63 +89,69 @@ class Player {
     draw() {
         const drawY = this.y - cameraY;
 
-        ctx.save();
-        ctx.translate(this.x + this.width / 2, drawY + this.height / 2);
+        if (playerImg.complete && playerImg.naturalWidth !== 0) {
+            // Desenha a skin do porco
+            ctx.drawImage(playerImg, this.x, drawY, this.width, this.height);
+        } else {
+            // Fallback: Alien Procedural
+            ctx.save();
+            ctx.translate(this.x + this.width / 2, drawY + this.height / 2);
 
-        // Efeito de sombra leve abaixo do alien
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
-        ctx.beginPath();
-        ctx.ellipse(0, 25, 15, 5, 0, 0, Math.PI * 2);
-        ctx.fill();
+            // Efeito de sombra leve abaixo do alien
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+            ctx.beginPath();
+            ctx.ellipse(0, 25, 15, 5, 0, 0, Math.PI * 2);
+            ctx.fill();
 
-        // Corpo/Cabeça do Alien (Verde Vibrante)
-        const gradient = ctx.createRadialGradient(-5, -5, 5, 0, 0, 25);
-        gradient.addColorStop(0, '#a2ff00'); // Brilho interno
-        gradient.addColorStop(1, '#4CAF50'); // Cor base
+            // Corpo/Cabeça do Alien (Verde Vibrante)
+            const gradient = ctx.createRadialGradient(-5, -5, 5, 0, 0, 25);
+            gradient.addColorStop(0, '#a2ff00'); // Brilho interno
+            gradient.addColorStop(1, '#4CAF50'); // Cor base
 
-        ctx.fillStyle = gradient;
-        ctx.beginPath();
-        ctx.ellipse(0, 0, 20, 24, 0, 0, Math.PI * 2);
-        ctx.fill();
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.ellipse(0, 0, 20, 24, 0, 0, Math.PI * 2);
+            ctx.fill();
 
-        // Detalhe da borda para dar profundidade
-        ctx.strokeStyle = '#2e7d32';
-        ctx.lineWidth = 2;
-        ctx.stroke();
+            // Detalhe da borda para dar profundidade
+            ctx.strokeStyle = '#2e7d32';
+            ctx.lineWidth = 2;
+            ctx.stroke();
 
-        // Olhos Grandes e Pretos (Estilo Alien Clássico)
-        ctx.fillStyle = '#1a1a1a';
+            // Olhos Grandes e Pretos
+            ctx.fillStyle = '#1a1a1a';
 
-        // Olho Esquerdo
-        ctx.save();
-        ctx.translate(-10, -2);
-        ctx.rotate(Math.PI / 6);
-        ctx.beginPath();
-        ctx.ellipse(0, 0, 6, 11, 0, 0, Math.PI * 2);
-        ctx.fill();
-        // Brilho no Olho
-        ctx.fillStyle = 'white';
-        ctx.beginPath();
-        ctx.arc(2, -4, 2, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
+            // Olho Esquerdo
+            ctx.save();
+            ctx.translate(-10, -2);
+            ctx.rotate(Math.PI / 6);
+            ctx.beginPath();
+            ctx.ellipse(0, 0, 6, 11, 0, 0, Math.PI * 2);
+            ctx.fill();
+            // Brilho no Olho
+            ctx.fillStyle = 'white';
+            ctx.beginPath();
+            ctx.arc(2, -4, 2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
 
-        // Olho Direito
-        ctx.save();
-        ctx.fillStyle = '#1a1a1a';
-        ctx.translate(10, -2);
-        ctx.rotate(-Math.PI / 6);
-        ctx.beginPath();
-        ctx.ellipse(0, 0, 6, 11, 0, 0, Math.PI * 2);
-        ctx.fill();
-        // Brilho no Olho
-        ctx.fillStyle = 'white';
-        ctx.beginPath();
-        ctx.arc(-2, -4, 2, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
+            // Olho Direito
+            ctx.save();
+            ctx.fillStyle = '#1a1a1a';
+            ctx.translate(10, -2);
+            ctx.rotate(-Math.PI / 6);
+            ctx.beginPath();
+            ctx.ellipse(0, 0, 6, 11, 0, 0, Math.PI * 2);
+            ctx.fill();
+            // Brilho no Olho
+            ctx.fillStyle = 'white';
+            ctx.beginPath();
+            ctx.arc(-2, -4, 2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
 
-        ctx.restore();
+            ctx.restore();
+        }
     }
 
     jump() {
@@ -207,7 +213,9 @@ function spawnPlatforms() {
 
     const highest = platforms[platforms.length - 1];
     if (highest.y > cameraY - 100) {
-        const gap = Math.min(80 + (score / 12), 170);
+        // Ajuste: Gaps reduzidos após 800 pontos para não ficar impossível
+        let maxGap = (score >= 800) ? 145 : 170;
+        const gap = Math.min(80 + (score / 12), maxGap);
         platforms.push(new Platform(highest.y - gap));
     }
 
