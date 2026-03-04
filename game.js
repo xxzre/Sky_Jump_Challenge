@@ -20,11 +20,7 @@ const CANVAS_WIDTH = 400;
 const CANVAS_HEIGHT = 600;
 const INITIAL_GRAVITY = 0.35;
 const INITIAL_HORIZONTAL_SPEED = 6;
-<<<<<<< HEAD
 const JUMP_FORCE = -12;
-=======
-const JUMP_FORCE = -20;
->>>>>>> fa0905bb7fa948b11418e7bed2b1f0e4921fcea4
 const SCORE_STEP = 200;
 const DIFFICULTY_INCREMENT = 0.05;
 
@@ -45,17 +41,10 @@ let platforms = [];
 let cameraY = 0;
 let gravity = INITIAL_GRAVITY;
 let horizontalSpeed = INITIAL_HORIZONTAL_SPEED;
-<<<<<<< HEAD
-let currentColor = { ...COLORS.EARTH };
-let animationId = null; // ID para controlar o loop
-const keys = {}; // Rastreador de teclas pressionadas
-let coins = parseInt(localStorage.getItem('skyJumpCoins')) || 0; // Sistema de Moedas
-let enemies = []; // Inimigos que causam dano
-=======
 let currentColor = { r: 135, g: 206, b: 235 };
 let animationId = null;
 const keys = {};
->>>>>>> fa0905bb7fa948b11418e7bed2b1f0e4921fcea4
+let enemies = []; // Inimigos que causam dano
 
 // Economia e Skins
 let coins = parseInt(localStorage.getItem('skyJumpCoins')) || 0;
@@ -193,7 +182,6 @@ class Platform {
     }
 }
 
-<<<<<<< HEAD
 class Enemy {
     constructor(y) {
         this.width = 40;
@@ -248,45 +236,11 @@ function lerp(start, end, amt) {
     return (1 - amt) * start + amt * end;
 }
 
-function updateColors() {
-    let factor = 0;
-
-    if (score <= 500) {
-        factor = score / 500;
-        currentColor.r = Math.floor(lerp(COLORS.EARTH.r, COLORS.SKY.r, factor));
-        currentColor.g = Math.floor(lerp(COLORS.EARTH.g, COLORS.SKY.g, factor));
-        currentColor.b = Math.floor(lerp(COLORS.EARTH.b, COLORS.SKY.b, factor));
-    } else if (score <= 1000) {
-        factor = (score - 500) / 500;
-        currentColor.r = Math.floor(lerp(COLORS.SKY.r, COLORS.SPACE.r, factor));
-        currentColor.g = Math.floor(lerp(COLORS.SKY.g, COLORS.SPACE.g, factor));
-        currentColor.b = Math.floor(lerp(COLORS.SKY.b, COLORS.SPACE.b, factor));
-    } else {
-        currentColor = { ...COLORS.SPACE };
-    }
-}
-
-function updateDifficulty() {
-    const level = Math.floor(score / SCORE_STEP);
-    gravity = INITIAL_GRAVITY + (level * 0.02);
-    horizontalSpeed = INITIAL_HORIZONTAL_SPEED + (level * 0.5);
-}
-
-function spawnPlatforms() {
-    if (platforms.length === 0) return;
-
-    const highest = platforms[platforms.length - 1];
-    if (highest.y > cameraY - 100) {
-        let maxGap = (score >= 800) ? 145 : 170;
-        const gap = Math.min(80 + (score / 12), maxGap);
-        platforms.push(new Platform(highest.y - gap));
-=======
 function spawnPlatforms() {
     let highestPlatformY = platforms.length > 0 ? platforms[platforms.length - 1].y : CANVAS_HEIGHT;
     while (highestPlatformY > cameraY - 100) {
         highestPlatformY -= 90 + Math.random() * 40;
         platforms.push(new Platform(highestPlatformY));
->>>>>>> fa0905bb7fa948b11418e7bed2b1f0e4921fcea4
     }
     if (platforms[0].y - cameraY > CANVAS_HEIGHT + 100) {
         platforms.shift();
@@ -316,15 +270,7 @@ function checkCollisions() {
                 player.y + player.height > p.y &&
                 player.y + player.height < p.y + p.height + player.vy) {
 
-<<<<<<< HEAD
-                if (p.type === 'BOOST') {
-                    player.vy = JUMP_FORCE * 1.8;
-                } else {
-                    player.jump();
-                }
-=======
                 player.jump(p.type === 'BOOST' ? 1.8 : 1);
->>>>>>> fa0905bb7fa948b11418e7bed2b1f0e4921fcea4
 
                 const currentScore = Math.floor(Math.abs(player.y - (CANVAS_HEIGHT - 100)) / 10);
                 if (currentScore > score) {
@@ -339,19 +285,12 @@ function checkCollisions() {
             if (p.hasCoin && !p.coinCollected) {
                 const coinX = p.x + p.width / 2;
                 const coinY = p.y - 15;
-<<<<<<< HEAD
-                const distX = Math.abs(player.x + player.width / 2 - coinX);
-                const distY = Math.abs(player.y + player.height / 2 - coinY);
-
-                if (distX < 30 && distY < 30) {
-=======
                 const dist = Math.sqrt(
                     Math.pow((player.x + player.width / 2) - coinX, 2) +
                     Math.pow((player.y + player.height / 2) - coinY, 2)
                 );
 
                 if (dist < player.stats.magnet) {
->>>>>>> fa0905bb7fa948b11418e7bed2b1f0e4921fcea4
                     p.coinCollected = true;
                     coins++;
                     updateCoinUI();
@@ -360,7 +299,6 @@ function checkCollisions() {
             }
         });
     }
-<<<<<<< HEAD
 
     if (player) {
         enemies.forEach(e => {
@@ -371,10 +309,11 @@ function checkCollisions() {
                 endGame();
             }
         });
+
+        if (player.y - cameraY > CANVAS_HEIGHT) {
+            endGame();
+        }
     }
-=======
-    if (player.y - cameraY > CANVAS_HEIGHT) endGame();
->>>>>>> fa0905bb7fa948b11418e7bed2b1f0e4921fcea4
 }
 
 function updateCoinUI() {
@@ -401,40 +340,21 @@ let player = null;
 
 function gameLoop() {
     if (!gameActive) return;
-<<<<<<< HEAD
 
-    updateColors();
-    ctx.fillStyle = `rgb(${currentColor.r}, ${currentColor.g}, ${currentColor.b})`;
-    ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-
-    if (player) {
-        player.update();
-
-        if (player.y < cameraY + CANVAS_HEIGHT * 0.4) {
-            cameraY = player.y - CANVAS_HEIGHT * 0.4;
-        }
-
-        checkCollisions();
-        spawnPlatforms();
-        spawnEnemies();
-
-        platforms.forEach(p => p.draw());
-        enemies.forEach(e => {
-            e.update();
-            e.draw();
-        });
-        player.draw();
-    }
-
-=======
     ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
     player.update();
     spawnPlatforms();
+    spawnEnemies();
     checkCollisions();
     updateBackground();
+
     platforms.forEach(p => p.draw());
+    enemies.forEach(e => {
+        e.update();
+        e.draw();
+    });
     player.draw();
->>>>>>> fa0905bb7fa948b11418e7bed2b1f0e4921fcea4
+
     animationId = requestAnimationFrame(gameLoop);
 }
 
@@ -444,13 +364,8 @@ function startGame() {
     cameraY = 0;
     gravity = INITIAL_GRAVITY;
     platforms = [];
-<<<<<<< HEAD
     enemies = [];
-    player = new Player();
-    currentColor = { ...COLORS.EARTH };
-=======
     scoreValueDisplay.textContent = '0';
->>>>>>> fa0905bb7fa948b11418e7bed2b1f0e4921fcea4
 
     for (let i = 0; i < 7; i++) {
         platforms.push(new Platform(CANVAS_HEIGHT - (i * 100) - 50, i === 0));
