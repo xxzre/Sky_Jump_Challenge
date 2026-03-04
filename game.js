@@ -1,17 +1,18 @@
-/**
- * 🛸 Sky Jump Alien: Journey to the Stars
- * Baseado no novo GDD - Implementação Antigravity
- */
-
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
-const scoreValue = document.getElementById('score-value');
-const highScoreValue = document.getElementById('high-score-value');
-const finalScore = document.getElementById('final-score');
+const scoreValueDisplay = document.getElementById('score-value');
+const highScoreValueDisplay = document.getElementById('high-score-value');
+const finalScoreDisplay = document.getElementById('final-score');
 const startScreen = document.getElementById('start-screen');
+const shopScreen = document.getElementById('shop-screen');
 const gameOverScreen = document.getElementById('game-over-screen');
 const startButton = document.getElementById('start-button');
+const shopButton = document.getElementById('shop-button');
+const closeShopButton = document.getElementById('close-shop');
 const restartButton = document.getElementById('restart-button');
+const menuButton = document.getElementById('menu-button');
+const coinDisplay = document.getElementById('coin-count');
+const skinListContainer = document.getElementById('skin-list');
 const bgMusic = document.getElementById('bg-music');
 
 // Configurações e Física
@@ -19,16 +20,22 @@ const CANVAS_WIDTH = 400;
 const CANVAS_HEIGHT = 600;
 const INITIAL_GRAVITY = 0.35;
 const INITIAL_HORIZONTAL_SPEED = 6;
+<<<<<<< HEAD
 const JUMP_FORCE = -12;
+=======
+const JUMP_FORCE = -20;
+>>>>>>> fa0905bb7fa948b11418e7bed2b1f0e4921fcea4
 const SCORE_STEP = 200;
-const DIFFICULTY_INCREMENT = 0.1;
+const DIFFICULTY_INCREMENT = 0.05;
 
-// Cores para Transição (RGB)
-const COLORS = {
-    EARTH: { r: 139, g: 69, b: 19 },     // #8B4513 (Marrom)
-    SKY: { r: 135, g: 206, b: 235 },      // #87CEEB (Azul Claro)
-    SPACE: { r: 0, g: 0, b: 51 }          // #000033 (Azul Escuro)
-};
+// Skins e Habilidades
+const SKINS = [
+    { id: 'default', name: 'Porquinho Rosa', color: '#ffb6c1', imgSrc: 'assets/Porquinho_da_Sorte.png', price: 0, ability: 'Padrão', stats: { gravity: 0, speed: 0, jump: 0, magnet: 35 } },
+    { id: 'neon', name: 'Neon Runner', color: '#00e5ff', price: 50, ability: '+25% Velocidade', stats: { gravity: 0, speed: 1.5, jump: 0, magnet: 35 } },
+    { id: 'jump', name: 'Super Hopper', color: '#ff4081', price: 100, ability: '+15% Pulo', stats: { gravity: 0, speed: 0, jump: -3, magnet: 35 } },
+    { id: 'magnet', name: 'Star Magnet', color: '#ffea00', price: 150, ability: 'Imã de Moedas', stats: { gravity: 0, speed: 0, jump: 0, magnet: 100 } },
+    { id: 'gravity', name: 'Astronauta', color: '#ffffff', price: 200, ability: '-15% Gravidade', stats: { gravity: -0.05, speed: 0, jump: 0, magnet: 40 } }
+];
 
 // Estado do Jogo
 let score = 0;
@@ -38,176 +45,155 @@ let platforms = [];
 let cameraY = 0;
 let gravity = INITIAL_GRAVITY;
 let horizontalSpeed = INITIAL_HORIZONTAL_SPEED;
+<<<<<<< HEAD
 let currentColor = { ...COLORS.EARTH };
 let animationId = null; // ID para controlar o loop
 const keys = {}; // Rastreador de teclas pressionadas
 let coins = parseInt(localStorage.getItem('skyJumpCoins')) || 0; // Sistema de Moedas
 let enemies = []; // Inimigos que causam dano
+=======
+let currentColor = { r: 135, g: 206, b: 235 };
+let animationId = null;
+const keys = {};
+>>>>>>> fa0905bb7fa948b11418e7bed2b1f0e4921fcea4
 
-// Exibir Recorde Inicial
-highScoreValue.textContent = highScore;
+// Economia e Skins
+let coins = parseInt(localStorage.getItem('skyJumpCoins')) || 0;
+let purchasedSkins = JSON.parse(localStorage.getItem('skyJumpPurchased')) || ['default'];
+let activeSkinId = localStorage.getItem('skyJumpActiveSkin') || 'default';
 
-// Assets
-const playerImg = new Image();
-playerImg.src = 'assets/Porquinho_da_Sorte.png'; // Nova skin: Porco de Terno
-const platformImg = new Image();
-platformImg.src = 'assets/platform_sprite_1772562823010.png';
+// Transições de Cores
+const COLORS = {
+    SKY: { r: 135, g: 206, b: 235 },
+    DEEP: { r: 26, g: 35, b: 126 },
+    SPACE: { r: 0, g: 0, b: 51 }
+};
+
+// UI Inicial
+highScoreValueDisplay.textContent = highScore;
+updateCoinUI();
 
 class Player {
     constructor() {
-        this.width = 55; // Aumentado para melhor visibilidade da skin
-        this.height = 55;
+        this.width = 40;
+        this.height = 40;
         this.x = CANVAS_WIDTH / 2 - this.width / 2;
         this.y = CANVAS_HEIGHT - 100;
         this.vx = 0;
         this.vy = 0;
-    }
 
-    update() {
-        this.x += this.vx;
-
-        // Screen wrap
-        if (this.x + this.width < 0) this.x = CANVAS_WIDTH;
-        if (this.x > CANVAS_WIDTH) this.x = -this.width;
-
-        this.vy += gravity;
-        this.y += this.vy;
-
-        // Lógica de movimento baseada nas teclas pressionadas
-        if (keys['ArrowLeft'] || keys['a'] || keys['A']) {
-            this.vx = -horizontalSpeed;
-        } else if (keys['ArrowRight'] || keys['d'] || keys['D']) {
-            this.vx = horizontalSpeed;
+        // Carrega stats da skin ativa
+        const skin = SKINS.find(s => s.id === activeSkinId);
+        this.color = skin.color;
+        this.stats = skin.stats;
+        if (skin.imgSrc) {
+            this.image = new Image();
+            this.image.src = skin.imgSrc;
         } else {
-            this.vx = 0;
-        }
-
-        // Game over check
-        if (this.y - cameraY > CANVAS_HEIGHT) {
-            endGame();
+            this.image = null;
         }
     }
 
     draw() {
         const drawY = this.y - cameraY;
 
-        if (playerImg.complete && playerImg.naturalWidth !== 0) {
-            // Desenha a skin do porco
-            ctx.drawImage(playerImg, this.x, drawY, this.width, this.height);
-        } else {
-            // Fallback: Alien Procedural
-            ctx.save();
-            ctx.translate(this.x + this.width / 2, drawY + this.height / 2);
+        if (this.image && this.image.complete && this.image.naturalWidth > 0) {
+            ctx.drawImage(this.image, this.x, drawY, this.width, this.height);
+            return;
+        }
 
-            // Efeito de sombra leve abaixo do alien
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
-            ctx.beginPath();
-            ctx.ellipse(0, 25, 15, 5, 0, 0, Math.PI * 2);
-            ctx.fill();
+        ctx.fillStyle = this.color;
 
-            // Corpo/Cabeça do Alien (Verde Vibrante)
-            const gradient = ctx.createRadialGradient(-5, -5, 5, 0, 0, 25);
-            gradient.addColorStop(0, '#a2ff00'); // Brilho interno
-            gradient.addColorStop(1, '#4CAF50'); // Cor base
+        ctx.beginPath();
+        ctx.ellipse(this.x + this.width / 2, drawY + this.height / 2, this.width / 2, this.height / 2, 0, 0, Math.PI * 2);
+        ctx.fill();
 
-            ctx.fillStyle = gradient;
-            ctx.beginPath();
-            ctx.ellipse(0, 0, 20, 24, 0, 0, Math.PI * 2);
-            ctx.fill();
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = this.color;
 
-            // Detalhe da borda para dar profundidade
-            ctx.strokeStyle = '#2e7d32';
-            ctx.lineWidth = 2;
-            ctx.stroke();
+        ctx.fillStyle = 'white';
+        ctx.beginPath();
+        ctx.arc(this.x + this.width / 2 - 10, drawY + 15, 6, 0, Math.PI * 2);
+        ctx.arc(this.x + this.width / 2 + 10, drawY + 15, 6, 0, Math.PI * 2);
+        ctx.fill();
 
-            // Olhos Grandes e Pretos
-            ctx.fillStyle = '#1a1a1a';
+        ctx.fillStyle = 'black';
+        ctx.beginPath();
+        ctx.arc(this.x + this.width / 2 - 10, drawY + 15, 3, 0, Math.PI * 2);
+        ctx.arc(this.x + this.width / 2 + 10, drawY + 15, 3, 0, Math.PI * 2);
+        ctx.fill();
 
-            // Olho Esquerdo
-            ctx.save();
-            ctx.translate(-10, -2);
-            ctx.rotate(Math.PI / 6);
-            ctx.beginPath();
-            ctx.ellipse(0, 0, 6, 11, 0, 0, Math.PI * 2);
-            ctx.fill();
-            // Brilho no Olho
-            ctx.fillStyle = 'white';
-            ctx.beginPath();
-            ctx.arc(2, -4, 2, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.restore();
+        ctx.shadowBlur = 0;
+        ctx.strokeStyle = this.color;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(this.x + this.width / 2, drawY + 5);
+        ctx.lineTo(this.x + this.width / 2, drawY - 5);
+        ctx.stroke();
+    }
 
-            // Olho Direito
-            ctx.save();
-            ctx.fillStyle = '#1a1a1a';
-            ctx.translate(10, -2);
-            ctx.rotate(-Math.PI / 6);
-            ctx.beginPath();
-            ctx.ellipse(0, 0, 6, 11, 0, 0, Math.PI * 2);
-            ctx.fill();
-            // Brilho no Olho
-            ctx.fillStyle = 'white';
-            ctx.beginPath();
-            ctx.arc(-2, -4, 2, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.restore();
+    update() {
+        const currentSpeed = horizontalSpeed + this.stats.speed;
+        if (keys['ArrowLeft'] || keys['a']) this.vx = -currentSpeed;
+        else if (keys['ArrowRight'] || keys['d']) this.vx = currentSpeed;
+        else this.vx *= 0.8;
 
-            ctx.restore();
+        this.x += this.vx;
+        if (this.x + this.width < 0) this.x = CANVAS_WIDTH;
+        if (this.x > CANVAS_WIDTH) this.x = -this.width;
+
+        this.vy += (gravity + this.stats.gravity);
+        this.y += this.vy;
+
+        if (this.y < cameraY + 250) {
+            cameraY = this.y - 250;
         }
     }
 
-    jump() {
-        this.vy = JUMP_FORCE;
+    jump(multiplier = 1) {
+        this.vy = (JUMP_FORCE + this.stats.jump) * multiplier;
     }
 }
 
 class Platform {
     constructor(y, isFirst = false) {
-        this.width = 80;
+        this.width = 70;
         this.height = 12;
         this.x = Math.random() * (CANVAS_WIDTH - this.width);
         this.y = y;
-
-        // Define se é uma plataforma de Boost (15% de chance, exceto a primeira)
         this.type = (!isFirst && Math.random() < 0.15) ? 'BOOST' : 'NORMAL';
-
-        // Moedas (30% de chance de ter uma moeda se não for boost)
-        this.hasCoin = (!isFirst && this.type === 'NORMAL' && Math.random() < 0.3);
+        this.hasCoin = (!isFirst && this.type === 'NORMAL' && Math.random() < 0.25);
         this.coinCollected = false;
     }
 
     draw() {
         const drawY = this.y - cameraY;
+        ctx.fillStyle = 'rgba(0,0,0,0.2)';
+        ctx.fillRect(this.x + 4, drawY + 4, this.width, this.height);
 
-        // Desenha Plataforma
-        ctx.fillStyle = (this.type === 'BOOST') ? '#ffeb3b' : '#ffffff';
         if (this.type === 'BOOST') {
-            // Desenha detalhe do trampolim
+            ctx.fillStyle = '#ffeb3b';
             ctx.fillRect(this.x, drawY, this.width, this.height);
             ctx.fillStyle = '#f44336';
-            ctx.fillRect(this.x + 10, drawY - 4, this.width - 20, 4);
+            ctx.fillRect(this.x + 5, drawY - 4, this.width - 10, 4);
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = '#ffeb3b';
         } else {
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
             ctx.fillRect(this.x, drawY, this.width, this.height);
         }
+        ctx.shadowBlur = 0;
 
-        // Desenha Moeda
         if (this.hasCoin && !this.coinCollected) {
             ctx.fillStyle = '#ffd700';
             ctx.beginPath();
-            ctx.arc(this.x + this.width / 2, drawY - 15, 7, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.strokeStyle = '#b8860b';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-            // Brilho da moeda
-            ctx.fillStyle = 'white';
-            ctx.beginPath();
-            ctx.arc(this.x + this.width / 2 - 2, drawY - 17, 2, 0, Math.PI * 2);
+            ctx.arc(this.x + this.width / 2, drawY - 15, 8, 0, Math.PI * 2);
             ctx.fill();
         }
     }
 }
 
+<<<<<<< HEAD
 class Enemy {
     constructor(y) {
         this.width = 40;
@@ -294,9 +280,15 @@ function spawnPlatforms() {
         let maxGap = (score >= 800) ? 145 : 170;
         const gap = Math.min(80 + (score / 12), maxGap);
         platforms.push(new Platform(highest.y - gap));
+=======
+function spawnPlatforms() {
+    let highestPlatformY = platforms.length > 0 ? platforms[platforms.length - 1].y : CANVAS_HEIGHT;
+    while (highestPlatformY > cameraY - 100) {
+        highestPlatformY -= 90 + Math.random() * 40;
+        platforms.push(new Platform(highestPlatformY));
+>>>>>>> fa0905bb7fa948b11418e7bed2b1f0e4921fcea4
     }
-
-    if (platforms.length > 0 && platforms[0].y - cameraY > CANVAS_HEIGHT + 100) {
+    if (platforms[0].y - cameraY > CANVAS_HEIGHT + 100) {
         platforms.shift();
     }
 }
@@ -324,22 +316,22 @@ function checkCollisions() {
                 player.y + player.height > p.y &&
                 player.y + player.height < p.y + p.height + player.vy) {
 
+<<<<<<< HEAD
                 if (p.type === 'BOOST') {
                     player.vy = JUMP_FORCE * 1.8;
                 } else {
                     player.jump();
                 }
+=======
+                player.jump(p.type === 'BOOST' ? 1.8 : 1);
+>>>>>>> fa0905bb7fa948b11418e7bed2b1f0e4921fcea4
 
                 const currentScore = Math.floor(Math.abs(player.y - (CANVAS_HEIGHT - 100)) / 10);
                 if (currentScore > score) {
                     score = currentScore;
-                    scoreValue.textContent = score;
-                    updateDifficulty();
-
-                    if (score > highScore) {
-                        highScore = score;
-                        highScoreValue.textContent = highScore;
-                        localStorage.setItem('skyJumpHighScore', highScore);
+                    scoreValueDisplay.textContent = score;
+                    if (score % SCORE_STEP === 0 && score > 0) {
+                        gravity += DIFFICULTY_INCREMENT;
                     }
                 }
             }
@@ -347,10 +339,19 @@ function checkCollisions() {
             if (p.hasCoin && !p.coinCollected) {
                 const coinX = p.x + p.width / 2;
                 const coinY = p.y - 15;
+<<<<<<< HEAD
                 const distX = Math.abs(player.x + player.width / 2 - coinX);
                 const distY = Math.abs(player.y + player.height / 2 - coinY);
 
                 if (distX < 30 && distY < 30) {
+=======
+                const dist = Math.sqrt(
+                    Math.pow((player.x + player.width / 2) - coinX, 2) +
+                    Math.pow((player.y + player.height / 2) - coinY, 2)
+                );
+
+                if (dist < player.stats.magnet) {
+>>>>>>> fa0905bb7fa948b11418e7bed2b1f0e4921fcea4
                     p.coinCollected = true;
                     coins++;
                     updateCoinUI();
@@ -359,6 +360,7 @@ function checkCollisions() {
             }
         });
     }
+<<<<<<< HEAD
 
     if (player) {
         enemies.forEach(e => {
@@ -370,17 +372,36 @@ function checkCollisions() {
             }
         });
     }
+=======
+    if (player.y - cameraY > CANVAS_HEIGHT) endGame();
+>>>>>>> fa0905bb7fa948b11418e7bed2b1f0e4921fcea4
 }
 
 function updateCoinUI() {
-    const coinDisplay = document.getElementById('coin-count');
     if (coinDisplay) coinDisplay.textContent = coins;
+}
+
+function updateBackground() {
+    let factor = Math.min(score / 5000, 1);
+    if (factor < 0.5) {
+        const localFactor = factor * 2;
+        currentColor.r = COLORS.SKY.r + (COLORS.DEEP.r - COLORS.SKY.r) * localFactor;
+        currentColor.g = COLORS.SKY.g + (COLORS.DEEP.g - COLORS.SKY.g) * localFactor;
+        currentColor.b = COLORS.SKY.b + (COLORS.DEEP.b - COLORS.SKY.b) * localFactor;
+    } else {
+        const localFactor = (factor - 0.5) * 2;
+        currentColor.r = COLORS.DEEP.r + (COLORS.SPACE.r - COLORS.DEEP.r) * localFactor;
+        currentColor.g = COLORS.DEEP.g + (COLORS.SPACE.g - COLORS.DEEP.g) * localFactor;
+        currentColor.b = COLORS.DEEP.b + (COLORS.SPACE.b - COLORS.DEEP.b) * localFactor;
+    }
+    canvas.style.background = `rgb(${Math.round(currentColor.r)}, ${Math.round(currentColor.g)}, ${Math.round(currentColor.b)})`;
 }
 
 let player = null;
 
 function gameLoop() {
     if (!gameActive) return;
+<<<<<<< HEAD
 
     updateColors();
     ctx.fillStyle = `rgb(${currentColor.r}, ${currentColor.g}, ${currentColor.b})`;
@@ -405,76 +426,142 @@ function gameLoop() {
         player.draw();
     }
 
+=======
+    ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+    player.update();
+    spawnPlatforms();
+    checkCollisions();
+    updateBackground();
+    platforms.forEach(p => p.draw());
+    player.draw();
+>>>>>>> fa0905bb7fa948b11418e7bed2b1f0e4921fcea4
     animationId = requestAnimationFrame(gameLoop);
 }
 
 function startGame() {
-    // Parar qualquer loop anterior
-    if (animationId) {
-        cancelAnimationFrame(animationId);
-    }
-
+    player = new Player();
     score = 0;
     cameraY = 0;
     gravity = INITIAL_GRAVITY;
-    horizontalSpeed = INITIAL_HORIZONTAL_SPEED;
-    scoreValue.textContent = '0';
     platforms = [];
+<<<<<<< HEAD
     enemies = [];
     player = new Player();
     currentColor = { ...COLORS.EARTH };
+=======
+    scoreValueDisplay.textContent = '0';
+>>>>>>> fa0905bb7fa948b11418e7bed2b1f0e4921fcea4
 
-    // Initial platforms
     for (let i = 0; i < 7; i++) {
         platforms.push(new Platform(CANVAS_HEIGHT - (i * 100) - 50, i === 0));
     }
     platforms[0].x = player.x - 15;
+    platforms[0].width = 80;
 
     gameActive = true;
     updateCoinUI();
     startScreen.classList.add('hidden');
+    shopScreen.classList.add('hidden');
     gameOverScreen.classList.add('hidden');
-
-    if (bgMusic) {
-        bgMusic.play().catch(() => console.log("Som aguardando interação"));
-    }
-
     gameLoop();
 }
 
 function endGame() {
     gameActive = false;
+    cancelAnimationFrame(animationId);
     gameOverScreen.classList.remove('hidden');
-    finalScore.textContent = `Pontuação: ${score}`;
+    finalScoreDisplay.textContent = `Score: ${score}`;
+    if (score > highScore) {
+        highScore = score;
+        localStorage.setItem('skyJumpHighScore', highScore);
+        highScoreValueDisplay.textContent = highScore;
+    }
 }
 
-// Controles
-window.addEventListener('keydown', (e) => {
-    keys[e.key] = true;
-});
+// Lógica da Loja
+function renderShop() {
+    skinListContainer.innerHTML = '';
+    SKINS.forEach(skin => {
+        const isPurchased = purchasedSkins.includes(skin.id);
+        const isActive = activeSkinId === skin.id;
 
-window.addEventListener('keyup', (e) => {
-    keys[e.key] = false;
-});
+        const card = document.createElement('div');
+        card.className = `skin-card ${isActive ? 'selected' : ''}`;
 
-canvas.addEventListener('mousedown', (e) => {
+        let previewHTML = '';
+        if (skin.imgSrc) {
+            previewHTML = `<div class="skin-preview" style="background-image: url('${skin.imgSrc}'); background-size: cover; background-position: center; border-radius: 50%;"></div>`;
+        } else {
+            previewHTML = `<div class="skin-preview" style="background: ${skin.color}"></div>`;
+        }
+
+        card.innerHTML = `
+            ${previewHTML}
+            <div class="skin-info">
+                <span class="skin-name">${skin.name}</span>
+                <span class="skin-ability">${skin.ability}</span>
+            </div>
+            <div class="skin-price">${isPurchased ? (isActive ? 'Ativo' : 'Selecionar') : skin.price + ' moedas'}</div>
+        `;
+
+        card.onclick = () => {
+            if (isPurchased) {
+                activeSkinId = skin.id;
+                localStorage.setItem('skyJumpActiveSkin', activeSkinId);
+                renderShop();
+            } else if (coins >= skin.price) {
+                coins -= skin.price;
+                purchasedSkins.push(skin.id);
+                activeSkinId = skin.id;
+                localStorage.setItem('skyJumpCoins', coins);
+                localStorage.setItem('skyJumpPurchased', JSON.stringify(purchasedSkins));
+                localStorage.setItem('skyJumpActiveSkin', activeSkinId);
+                updateCoinUI();
+                renderShop();
+            }
+        };
+        skinListContainer.appendChild(card);
+    });
+}
+
+// Eventos
+shopButton.onclick = () => {
+    startScreen.classList.add('hidden');
+    shopScreen.classList.remove('hidden');
+    renderShop();
+};
+
+closeShopButton.onclick = () => {
+    shopScreen.classList.add('hidden');
+    startScreen.classList.remove('hidden');
+};
+
+function handlePointerDown(e) {
+    if (!gameActive) return;
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
+    const x = (clientX - rect.left) * (CANVAS_WIDTH / rect.width);
     player.vx = (x < CANVAS_WIDTH / 2) ? -horizontalSpeed : horizontalSpeed;
-});
-canvas.addEventListener('mouseup', () => player.vx = 0);
+}
 
-canvas.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    const rect = canvas.getBoundingClientRect();
-    const x = e.touches[0].clientX - rect.left;
-    player.vx = (x < CANVAS_WIDTH / 2) ? -horizontalSpeed : horizontalSpeed;
-}, { passive: false });
-canvas.addEventListener('touchend', () => player.vx = 0);
+function handlePointerUp() { if (player) player.vx = 0; }
 
-startButton.addEventListener('click', startGame);
-restartButton.addEventListener('click', startGame);
+window.addEventListener('keydown', (e) => keys[e.key] = true);
+window.addEventListener('keyup', (e) => keys[e.key] = false);
+
+canvas.addEventListener('mousedown', handlePointerDown);
+canvas.addEventListener('mouseup', handlePointerUp);
+window.addEventListener('mouseup', handlePointerUp);
+canvas.addEventListener('touchstart', (e) => { e.preventDefault(); handlePointerDown(e); }, { passive: false });
+canvas.addEventListener('touchend', (e) => { e.preventDefault(); handlePointerUp(); }, { passive: false });
+
+startButton.onclick = startGame;
+restartButton.onclick = startGame;
+menuButton.onclick = () => {
+    gameOverScreen.classList.add('hidden');
+    startScreen.classList.remove('hidden');
+};
 
 canvas.width = CANVAS_WIDTH;
 canvas.height = CANVAS_HEIGHT;
-
+renderShop();

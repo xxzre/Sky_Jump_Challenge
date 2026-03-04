@@ -1,51 +1,68 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sky Jump Alien - Journey to the Stars</title>
-    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sky Jump Alien: Journey to the Stars</title>
+    <meta name="description"
+        content="Help the alien jump to the stars! A premium arcade journey with boost platforms and cosmic coins.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
     <div id="game-container">
+        <div class="stats-container">
+            <div class="stat-box">
+                <span>Score:</span>
+                <span id="score-value">0</span>
+            </div>
+            <div class="stat-box">
+                <div class="coin-icon"></div>
+                <span id="coin-count">0</span>
+            </div>
+        </div>
+
         <canvas id="gameCanvas"></canvas>
-        <div id="ui-layer">
-            <div id="hud">
-                <div class="hud-item">
-                    <span class="hud-label">Pontos:</span>
-                    <span id="score-value">0</span>
-                </div>
-                <div class="hud-item">
-                    <span class="hud-label">Moedas:</span>
-                    <span id="coin-count">0</span>
-                </div>
-                <div class="hud-item">
-                    <span class="hud-label">Recorde:</span>
-                    <span id="high-score-value">0</span>
-                </div>
+
+        <!-- Start Screen -->
+        <div id="start-screen" class="ui-layer">
+            <h1 class="floating">Sky Jump Alien</h1>
+            <p>Journey to the Stars</p>
+            <div class="menu-buttons">
+                <button id="start-button" class="btn">Play Now</button>
+                <button id="shop-button" class="btn secondary">Item Shop</button>
             </div>
-            <div id="start-screen" class="overlay">
-                <div class="glow"></div>
-                <h1>Sky Jump</h1>
-                <p>Use as setas ou clique para mover</p>
-                <button id="start-button">Começar</button>
+            <div class="high-score-label">Best: <span id="high-score-value">0</span></div>
+        </div>
+
+        <!-- Shop Screen -->
+        <div id="shop-screen" class="ui-layer hidden">
+            <h1>Alien Shop</h1>
+            <div id="skin-list" class="skin-container">
+                <!-- Skins will be injected here via JS -->
             </div>
-            <div id="game-over-screen" class="overlay hidden">
-                <h1>Game Over</h1>
-                <p>Você caiu!</p>
-                <div id="final-score">Pontuação: 0</div>
-                <button id="restart-button">Tentar Novamente</button>
+            <button id="close-shop" class="btn secondary">Back to Menu</button>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div id="game-over-screen" class="ui-layer hidden">
+            <h1>Game Over</h1>
+            <p id="final-score">Score: 0</p>
+            <div class="menu-buttons">
+                <button id="restart-button" class="btn">New Flight</button>
+                <button id="menu-button" class="btn secondary">Main Menu</button>
             </div>
         </div>
     </div>
+
     <audio id="bg-music" loop>
-        <source src="assets/music.mp3" type="audio/mpeg">
+        <!-- Placeholder for music if added later -->
     </audio>
+
     <script src="game.js"></script>
 </body>
 
