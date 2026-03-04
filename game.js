@@ -19,7 +19,7 @@ const CANVAS_WIDTH = 400;
 const CANVAS_HEIGHT = 600;
 const INITIAL_GRAVITY = 0.35;
 const INITIAL_HORIZONTAL_SPEED = 6;
-const JUMP_FORCE = -11;
+const JUMP_FORCE = -12;
 const SCORE_STEP = 200;
 const DIFFICULTY_INCREMENT = 0.1;
 
@@ -42,6 +42,7 @@ let currentColor = { ...COLORS.EARTH };
 let animationId = null; // ID para controlar o loop
 const keys = {}; // Rastreador de teclas pressionadas
 let coins = parseInt(localStorage.getItem('skyJumpCoins')) || 0; // Sistema de Moedas
+let enemies = []; // Inimigos que causam dano
 
 // Exibir Recorde Inicial
 highScoreValue.textContent = highScore;
@@ -207,6 +208,55 @@ class Platform {
     }
 }
 
+class Enemy {
+    constructor(y) {
+        this.width = 40;
+        this.height = 40;
+        this.x = Math.random() * (CANVAS_WIDTH - this.width);
+        this.y = y;
+        this.vx = (Math.random() - 0.5) * 3;
+        this.pulse = 0;
+    }
+
+    update() {
+        this.x += this.vx;
+        if (this.x <= 0 || this.x + this.width >= CANVAS_WIDTH) {
+            this.vx *= -1;
+        }
+        this.pulse += 0.1;
+    }
+
+    draw() {
+        const drawY = this.y - cameraY;
+        const scale = 1 + Math.sin(this.pulse) * 0.1;
+        ctx.save();
+        ctx.translate(this.x + this.width / 2, drawY + this.height / 2);
+        ctx.scale(scale, scale);
+        ctx.fillStyle = '#9c27b0';
+        ctx.beginPath();
+        ctx.arc(0, 0, 18, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#4a148c';
+        ctx.lineWidth = 3;
+        for (let i = 0; i < 6; i++) {
+            const angle = (i / 6) * Math.PI * 2 + this.pulse * 0.5;
+            ctx.beginPath();
+            ctx.moveTo(Math.cos(angle) * 15, Math.sin(angle) * 15);
+            ctx.lineTo(Math.cos(angle) * 25, Math.sin(angle) * 25);
+            ctx.stroke();
+        }
+        ctx.fillStyle = 'white';
+        ctx.beginPath();
+        ctx.ellipse(0, -2, 8, 10, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = 'red';
+        ctx.beginPath();
+        ctx.arc(0, -2, 4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+    }
+}
+
 // Funções Auxiliares
 function lerp(start, end, amt) {
     return (1 - amt) * start + amt * end;
@@ -241,7 +291,6 @@ function spawnPlatforms() {
 
     const highest = platforms[platforms.length - 1];
     if (highest.y > cameraY - 100) {
-        // Ajuste: Gaps reduzidos após 800 pontos para não ficar impossível
         let maxGap = (score >= 800) ? 145 : 170;
         const gap = Math.min(80 + (score / 12), maxGap);
         platforms.push(new Platform(highest.y - gap));
@@ -252,17 +301,31 @@ function spawnPlatforms() {
     }
 }
 
+function spawnEnemies() {
+    if (score < 300) return;
+
+    if (enemies.length === 0 || enemies[enemies.length - 1].y > cameraY - 400) {
+        const spawnChance = Math.min(0.05 + (score / 5000), 0.2);
+        if (Math.random() < spawnChance) {
+            enemies.push(new Enemy(cameraY - 100));
+        }
+    }
+
+    if (enemies.length > 0 && enemies[0].y - cameraY > CANVAS_HEIGHT + 100) {
+        enemies.shift();
+    }
+}
+
 function checkCollisions() {
     if (player && player.vy > 0) {
         platforms.forEach(p => {
-            // Colisão com Plataforma
             if (player.x + player.width > p.x &&
                 player.x < p.x + p.width &&
                 player.y + player.height > p.y &&
                 player.y + player.height < p.y + p.height + player.vy) {
 
                 if (p.type === 'BOOST') {
-                    player.vy = JUMP_FORCE * 1.8; // Salto muito mais alto
+                    player.vy = JUMP_FORCE * 1.8;
                 } else {
                     player.jump();
                 }
@@ -281,18 +344,29 @@ function checkCollisions() {
                 }
             }
 
-            // Coleta de Moedas
             if (p.hasCoin && !p.coinCollected) {
                 const coinX = p.x + p.width / 2;
                 const coinY = p.y - 15;
-                const dist = Math.sqrt(Math.pow(player.x + player.width / 2 - coinX, 2) + Math.pow(player.y + player.height / 2 - coinY, 2));
+                const distX = Math.abs(player.x + player.width / 2 - coinX);
+                const distY = Math.abs(player.y + player.height / 2 - coinY);
 
-                if (dist < 40) {
+                if (distX < 30 && distY < 30) {
                     p.coinCollected = true;
                     coins++;
                     updateCoinUI();
                     localStorage.setItem('skyJumpCoins', coins);
                 }
+            }
+        });
+    }
+
+    if (player) {
+        enemies.forEach(e => {
+            const distX = Math.abs((player.x + player.width / 2) - (e.x + e.width / 2));
+            const distY = Math.abs((player.y + player.height / 2) - (e.y + e.height / 2));
+
+            if (distX < 25 && distY < 25) {
+                endGame();
             }
         });
     }
@@ -321,8 +395,13 @@ function gameLoop() {
 
         checkCollisions();
         spawnPlatforms();
+        spawnEnemies();
 
         platforms.forEach(p => p.draw());
+        enemies.forEach(e => {
+            e.update();
+            e.draw();
+        });
         player.draw();
     }
 
@@ -341,6 +420,7 @@ function startGame() {
     horizontalSpeed = INITIAL_HORIZONTAL_SPEED;
     scoreValue.textContent = '0';
     platforms = [];
+    enemies = [];
     player = new Player();
     currentColor = { ...COLORS.EARTH };
 
