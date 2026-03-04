@@ -10,6 +10,7 @@ const startButton = document.getElementById('start-button');
 const shopButton = document.getElementById('shop-button');
 const closeShopButton = document.getElementById('close-shop');
 const restartButton = document.getElementById('restart-button');
+const menuButton = document.getElementById('menu-button');
 const coinDisplay = document.getElementById('coin-count');
 const skinListContainer = document.getElementById('skin-list');
 const bgMusic = document.getElementById('bg-music');
@@ -378,6 +379,10 @@ canvas.addEventListener('touchend', (e) => { e.preventDefault(); handlePointerUp
 
 startButton.onclick = startGame;
 restartButton.onclick = startGame;
+menuButton.onclick = () => {
+    gameOverScreen.classList.add('hidden');
+    startScreen.classList.remove('hidden');
+};
 
 canvas.width = CANVAS_WIDTH;
 canvas.height = CANVAS_HEIGHT;
