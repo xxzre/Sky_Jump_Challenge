@@ -10,7 +10,6 @@ const startButton = document.getElementById('start-button');
 const shopButton = document.getElementById('shop-button');
 const closeShopButton = document.getElementById('close-shop');
 const restartButton = document.getElementById('restart-button');
-const menuButton = document.getElementById('menu-button');
 const coinDisplay = document.getElementById('coin-count');
 const skinListContainer = document.getElementById('skin-list');
 const bgMusic = document.getElementById('bg-music');
@@ -20,57 +19,17 @@ const CANVAS_WIDTH = 400;
 const CANVAS_HEIGHT = 600;
 const INITIAL_GRAVITY = 0.35;
 const INITIAL_HORIZONTAL_SPEED = 6;
-const JUMP_FORCE = -12; // Abaixado para 12
+const JUMP_FORCE = -20;
 const SCORE_STEP = 200;
 const DIFFICULTY_INCREMENT = 0.05;
 
-// Traduções
-const TRANSLATIONS = {
-    pt: {
-        title: "Sky Jump",
-        subtitle: "A Jornada do Porquinho da Sorte",
-        play: "Jogar Agora",
-        shop: "Loja do Porquinho",
-        best: "Recorde",
-        shop_title: "Loja de Porquinhos",
-        back: "Voltar ao Menu",
-        game_over: "Fim de Jogo",
-        restart: "Novo Voo",
-        menu: "Menu Inicial",
-        score: "Pontuação",
-        purchased: "Comprado",
-        active: "Ativo",
-        select: "Selecionar",
-        coins: "moedas"
-    },
-    en: {
-        title: "Sky Jump",
-        subtitle: "Lucky Pig's Cosmic Journey",
-        play: "Play Now",
-        shop: "Piggy Shop",
-        best: "Best",
-        shop_title: "Piggy Shop",
-        back: "Back to Menu",
-        game_over: "Game Over",
-        restart: "New Flight",
-        menu: "Main Menu",
-        score: "Score",
-        purchased: "Purchased",
-        active: "Active",
-        select: "Select",
-        coins: "coins"
-    }
-};
-
-let currentLang = localStorage.getItem('skyJumpLang') || 'pt';
-
 // Skins e Habilidades
 const SKINS = [
-    { id: 'default', name: 'Porquinho Rosa', color: '#ff80ab', price: 0, ability: { pt: 'Padrão', en: 'Default' }, stats: { gravity: 0, speed: 0, jump: 0, magnet: 35 } },
-    { id: 'neon', name: 'Porquinho Neon', color: '#00e5ff', price: 50, ability: { pt: '+25% Velocidade', en: '+25% Speed' }, stats: { gravity: 0, speed: 1.5, jump: 0, magnet: 35 } },
-    { id: 'jump', name: 'Porco Saltador', color: '#f50057', price: 100, ability: { pt: '+15% Pulo', en: '+15% Jump' }, stats: { gravity: 0, speed: 0, jump: -2.5, magnet: 35 } },
-    { id: 'magnet', name: 'Porco de Ouro', color: '#ffd700', price: 150, ability: { pt: 'Imã de Moedas', en: 'Coin Magnet' }, stats: { gravity: 0, speed: 0, jump: 0, magnet: 100 } },
-    { id: 'gravity', name: 'Porco Espacial', color: '#e0e0e0', price: 200, ability: { pt: '-15% Gravidade', en: '-15% Gravity' }, stats: { gravity: -0.05, speed: 0, jump: 0, magnet: 40 } }
+    { id: 'default', name: 'Porquinho Rosa', color: '#ffb6c1', imgSrc: 'assets/Porquinho_da_Sorte.png', price: 0, ability: 'Padrão', stats: { gravity: 0, speed: 0, jump: 0, magnet: 35 } },
+    { id: 'neon', name: 'Neon Runner', color: '#00e5ff', price: 50, ability: '+25% Velocidade', stats: { gravity: 0, speed: 1.5, jump: 0, magnet: 35 } },
+    { id: 'jump', name: 'Super Hopper', color: '#ff4081', price: 100, ability: '+15% Pulo', stats: { gravity: 0, speed: 0, jump: -3, magnet: 35 } },
+    { id: 'magnet', name: 'Star Magnet', color: '#ffea00', price: 150, ability: 'Imã de Moedas', stats: { gravity: 0, speed: 0, jump: 0, magnet: 100 } },
+    { id: 'gravity', name: 'Astronauta', color: '#ffffff', price: 200, ability: '-15% Gravidade', stats: { gravity: -0.05, speed: 0, jump: 0, magnet: 40 } }
 ];
 
 // Estado do Jogo
@@ -97,26 +56,9 @@ const COLORS = {
     SPACE: { r: 0, g: 0, b: 51 }
 };
 
-function updateLangUI() {
-    document.querySelectorAll('[data-t]').forEach(el => {
-        const key = el.getAttribute('data-t');
-        if (TRANSLATIONS[currentLang][key]) {
-            el.textContent = TRANSLATIONS[currentLang][key];
-        }
-    });
-
-    document.getElementById('lang-pt').classList.toggle('active', currentLang === 'pt');
-    document.getElementById('lang-en').classList.toggle('active', currentLang === 'en');
-
-    if (gameOverScreen.classList.contains('hidden') === false) {
-        finalScoreDisplay.textContent = `${TRANSLATIONS[currentLang].score}: ${score}`;
-    }
-}
-
 // UI Inicial
 highScoreValueDisplay.textContent = highScore;
 updateCoinUI();
-updateLangUI();
 
 class Player {
     constructor() {
@@ -127,81 +69,61 @@ class Player {
         this.vx = 0;
         this.vy = 0;
 
+        // Carrega stats da skin ativa
         const skin = SKINS.find(s => s.id === activeSkinId);
         this.color = skin.color;
         this.stats = skin.stats;
+        if (skin.imgSrc) {
+            this.image = new Image();
+            this.image.src = skin.imgSrc;
+        } else {
+            this.image = null;
+        }
     }
 
     draw() {
         const drawY = this.y - cameraY;
-        const centerX = this.x + this.width / 2;
-        const centerY = drawY + this.height / 2;
 
-        ctx.save();
+        if (this.image && this.image.complete && this.image.naturalWidth > 0) {
+            ctx.drawImage(this.image, this.x, drawY, this.width, this.height);
+            return;
+        }
 
-        // Cor do porquinho
         ctx.fillStyle = this.color;
 
-        // Orelhas
         ctx.beginPath();
-        ctx.moveTo(centerX - 12, centerY - 15);
-        ctx.lineTo(centerX - 24, centerY - 32);
-        ctx.lineTo(centerX - 4, centerY - 22);
-        ctx.fill();
-        ctx.beginPath();
-        ctx.moveTo(centerX + 12, centerY - 15);
-        ctx.lineTo(centerX + 24, centerY - 32);
-        ctx.lineTo(centerX + 4, centerY - 22);
+        ctx.ellipse(this.x + this.width / 2, drawY + this.height / 2, this.width / 2, this.height / 2, 0, 0, Math.PI * 2);
         ctx.fill();
 
-        // Corpo Redondo
-        ctx.beginPath();
-        ctx.arc(centerX, centerY, this.width / 2, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = this.color;
 
-        // Focinho (Rosa mais escuro ou cor contrastante)
-        ctx.fillStyle = activeSkinId === 'magnet' ? '#b8860b' : '#f06292';
-        ctx.beginPath();
-        ctx.ellipse(centerX, centerY + 8, 12, 8, 0, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Narinas
-        ctx.fillStyle = 'rgba(0,0,0,0.2)';
-        ctx.beginPath();
-        ctx.arc(centerX - 4, centerY + 8, 2, 0, Math.PI * 2);
-        ctx.arc(centerX + 4, centerY + 8, 2, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Olhos
-        ctx.fillStyle = 'black';
-        ctx.beginPath();
-        ctx.arc(centerX - 10, centerY - 5, 4, 0, Math.PI * 2);
-        ctx.arc(centerX + 10, centerY - 5, 4, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Brilho nos olhos
         ctx.fillStyle = 'white';
         ctx.beginPath();
-        ctx.arc(centerX - 11, centerY - 6, 1.5, 0, Math.PI * 2);
-        ctx.arc(centerX + 9, centerY - 6, 1.5, 0, Math.PI * 2);
+        ctx.arc(this.x + this.width / 2 - 10, drawY + 15, 6, 0, Math.PI * 2);
+        ctx.arc(this.x + this.width / 2 + 10, drawY + 15, 6, 0, Math.PI * 2);
         ctx.fill();
 
-        ctx.restore();
+        ctx.fillStyle = 'black';
+        ctx.beginPath();
+        ctx.arc(this.x + this.width / 2 - 10, drawY + 15, 3, 0, Math.PI * 2);
+        ctx.arc(this.x + this.width / 2 + 10, drawY + 15, 3, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.shadowBlur = 0;
+        ctx.strokeStyle = this.color;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(this.x + this.width / 2, drawY + 5);
+        ctx.lineTo(this.x + this.width / 2, drawY - 5);
+        ctx.stroke();
     }
 
     update() {
         const currentSpeed = horizontalSpeed + this.stats.speed;
-
-        // Horizontal Movement logic including Mobile/Mouse hold
-        if (keys['ArrowLeft'] || keys['a'] || keys['left_hold']) {
-            this.vx = -currentSpeed;
-        }
-        else if (keys['ArrowRight'] || keys['d'] || keys['right_hold']) {
-            this.vx = currentSpeed;
-        }
-        else {
-            this.vx *= 0.8;
-        }
+        if (keys['ArrowLeft'] || keys['a']) this.vx = -currentSpeed;
+        else if (keys['ArrowRight'] || keys['d']) this.vx = currentSpeed;
+        else this.vx *= 0.8;
 
         this.x += this.vx;
         if (this.x + this.width < 0) this.x = CANVAS_WIDTH;
@@ -369,20 +291,12 @@ function endGame() {
     gameActive = false;
     cancelAnimationFrame(animationId);
     gameOverScreen.classList.remove('hidden');
-    finalScoreDisplay.textContent = `${TRANSLATIONS[currentLang].score}: ${score}`;
+    finalScoreDisplay.textContent = `Score: ${score}`;
     if (score > highScore) {
         highScore = score;
         localStorage.setItem('skyJumpHighScore', highScore);
         highScoreValueDisplay.textContent = highScore;
     }
-}
-
-function goToMenu() {
-    gameOverScreen.classList.add('hidden');
-    startScreen.classList.remove('hidden');
-    ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-    score = 0;
-    scoreValueDisplay.textContent = '0';
 }
 
 // Lógica da Loja
@@ -395,15 +309,20 @@ function renderShop() {
         const card = document.createElement('div');
         card.className = `skin-card ${isActive ? 'selected' : ''}`;
 
-        let statusText = isPurchased ? (isActive ? TRANSLATIONS[currentLang].active : TRANSLATIONS[currentLang].select) : `${skin.price} ${TRANSLATIONS[currentLang].coins}`;
+        let previewHTML = '';
+        if (skin.imgSrc) {
+            previewHTML = `<div class="skin-preview" style="background-image: url('${skin.imgSrc}'); background-size: cover; background-position: center; border-radius: 50%;"></div>`;
+        } else {
+            previewHTML = `<div class="skin-preview" style="background: ${skin.color}"></div>`;
+        }
 
         card.innerHTML = `
-            <div class="skin-preview" style="background: ${skin.color}"></div>
+            ${previewHTML}
             <div class="skin-info">
                 <span class="skin-name">${skin.name}</span>
-                <span class="skin-ability">${skin.ability[currentLang]}</span>
+                <span class="skin-ability">${skin.ability}</span>
             </div>
-            <div class="skin-price">${statusText}</div>
+            <div class="skin-price">${isPurchased ? (isActive ? 'Ativo' : 'Selecionar') : skin.price + ' moedas'}</div>
         `;
 
         card.onclick = () => {
@@ -438,39 +357,15 @@ closeShopButton.onclick = () => {
     startScreen.classList.remove('hidden');
 };
 
-document.getElementById('lang-pt').onclick = () => {
-    currentLang = 'pt';
-    localStorage.setItem('skyJumpLang', 'pt');
-    updateLangUI();
-    renderShop();
-};
-
-document.getElementById('lang-en').onclick = () => {
-    currentLang = 'en';
-    localStorage.setItem('skyJumpLang', 'en');
-    updateLangUI();
-    renderShop();
-};
-
 function handlePointerDown(e) {
     if (!gameActive) return;
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const rect = canvas.getBoundingClientRect();
     const x = (clientX - rect.left) * (CANVAS_WIDTH / rect.width);
-
-    if (x < CANVAS_WIDTH / 2) {
-        keys['left_hold'] = true;
-        keys['right_hold'] = false;
-    } else {
-        keys['right_hold'] = true;
-        keys['left_hold'] = false;
-    }
+    player.vx = (x < CANVAS_WIDTH / 2) ? -horizontalSpeed : horizontalSpeed;
 }
 
-function handlePointerUp() {
-    keys['left_hold'] = false;
-    keys['right_hold'] = false;
-}
+function handlePointerUp() { if (player) player.vx = 0; }
 
 window.addEventListener('keydown', (e) => keys[e.key] = true);
 window.addEventListener('keyup', (e) => keys[e.key] = false);
@@ -483,7 +378,6 @@ canvas.addEventListener('touchend', (e) => { e.preventDefault(); handlePointerUp
 
 startButton.onclick = startGame;
 restartButton.onclick = startGame;
-menuButton.onclick = goToMenu;
 
 canvas.width = CANVAS_WIDTH;
 canvas.height = CANVAS_HEIGHT;
