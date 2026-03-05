@@ -289,8 +289,8 @@ window.addEventListener('load', () => {
         update() {
             const currentSpeed = horizontalSpeed + this.stats.speed;
 
-            const goLeft = keys[leftKey] || keys[leftKey.toUpperCase()] || keys['ArrowLeft'];
-            const goRight = keys[rightKey] || keys[rightKey.toUpperCase()] || keys['ArrowRight'];
+            const goLeft = keys[leftKey] || keys[leftKey.toUpperCase()] || keys['ArrowLeft'] || keys['TouchLeft'];
+            const goRight = keys[rightKey] || keys[rightKey.toUpperCase()] || keys['ArrowRight'] || keys['TouchRight'];
 
             if (goLeft) this.vx = -currentSpeed;
             else if (goRight) this.vx = currentSpeed;
@@ -417,17 +417,19 @@ window.addEventListener('load', () => {
     }
 
     function spawnEnemies() {
-        // Surgem após 400 pontos para dar tempo de acostumar
         if (score < 400) return;
 
-        if (enemies.length === 0 || enemies[enemies.length - 1].y > cameraY - 1200) {
-            const spawnChance = Math.min(0.005 + (score / 25000), 0.05);
+        const spawnY = cameraY - 300;
+        const minDistance = 1500; // Distância mínima entre bixos
+
+        if (enemies.length === 0 || Math.abs(enemies[enemies.length - 1].y - spawnY) > minDistance) {
+            const spawnChance = Math.min(0.005 + (score / 30000), 0.04);
             if (Math.random() < spawnChance) {
-                enemies.push(new Enemy(cameraY - 250));
+                enemies.push(new Enemy(spawnY));
             }
         }
 
-        if (enemies.length > 0 && enemies[0].y - cameraY > CANVAS_HEIGHT + 100) {
+        if (enemies.length > 0 && enemies[0].y - cameraY > CANVAS_HEIGHT + 200) {
             enemies.shift();
         }
     }
@@ -798,24 +800,28 @@ window.addEventListener('load', () => {
         const rect = canvas.getBoundingClientRect();
         const x = (clientX - rect.left) * (CANVAS_WIDTH / rect.width);
 
-        const currentSpeed = horizontalSpeed + player.stats.speed;
         const center = CANVAS_WIDTH / 2;
 
         if (x < center) {
-            player.vx = -currentSpeed;
+            keys['TouchLeft'] = true;
+            keys['TouchRight'] = false;
         } else {
-            player.vx = currentSpeed;
+            keys['TouchRight'] = true;
+            keys['TouchLeft'] = false;
         }
     };
 
     const handlePointerMove = (e) => {
-        if (!gameActive || !player || player.vx === 0) return;
-        // Permite mudar de direção deslizando o dedo sem soltar
-        handlePointerDown(e);
+        if (!gameActive || !player) return;
+        // Se já houver um toque ativo, atualiza a direção conforme o deslize
+        if (keys['TouchLeft'] || keys['TouchRight']) {
+            handlePointerDown(e);
+        }
     };
 
     const handlePointerUp = () => {
-        if (player) player.vx = 0;
+        keys['TouchLeft'] = false;
+        keys['TouchRight'] = false;
     };
 
     window.addEventListener('keydown', (e) => keys[e.key] = true);
