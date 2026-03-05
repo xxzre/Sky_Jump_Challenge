@@ -160,7 +160,7 @@ window.addEventListener('load', () => {
         { id: 'default', color: '#ffb6c1', imgSrc: 'assets/Porquinho_Da_Sorte_Gay.png', price: 0, stats: { gravity: 0, speed: 0, jump: 0, magnet: 40 } },
         { id: 'neon', color: '#000000ff', imgSrc: 'assets/Porquinho_Da_Sorte_Preto.png', price: 50, stats: { gravity: 0, speed: 1.5, jump: 0, magnet: 40 } },
         { id: 'jump', color: '#ffe600ff', imgSrc: 'assets/Porquinho_Da_Sorte_Mirassol.png', price: 100, stats: { gravity: 0, speed: 0, jump: -3, magnet: 40 } },
-        { id: 'magnet', color: '#ff0000ff', imgSrc: 'assets/Porquinho_Da_Sorte_PT.png', price: 150, stats: { gravity: 0, speed: 0, jump: 0, magnet: 120 } },
+        { id: 'magnet', color: '#ff0000ff', imgSrc: 'assets/Porquinho_da_Sorte_PT.png', price: 150, stats: { gravity: 0, speed: 0, jump: 0, magnet: 120 } },
         { id: 'gravity', color: '#ffffff', imgSrc: 'assets/Porquinho_Da_Sorte_Branco.png', price: 200, stats: { gravity: -0.05, speed: 0, jump: 0, magnet: 45 } }
     ];
 
