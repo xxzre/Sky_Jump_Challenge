@@ -289,8 +289,9 @@ window.addEventListener('load', () => {
         update() {
             const currentSpeed = horizontalSpeed + this.stats.speed;
 
-            const goLeft = keys[leftKey] || keys[leftKey.toUpperCase()] || keys['ArrowLeft'];
-            const goRight = keys[rightKey] || keys[rightKey.toUpperCase()] || keys['ArrowRight'];
+            // Bloqueio Total: Apenas teclas físicas (keyboard) são aceitas
+            const goLeft = (keys[leftKey] === true) || (keys[leftKey.toUpperCase()] === true) || (keys['ArrowLeft'] === true);
+            const goRight = (keys[rightKey] === true) || (keys[rightKey.toUpperCase()] === true) || (keys['ArrowRight'] === true);
 
             if (goLeft) this.vx = -currentSpeed;
             else if (goRight) this.vx = currentSpeed;
@@ -749,62 +750,20 @@ window.addEventListener('load', () => {
     if (mapLeftBtn) mapLeftBtn.addEventListener('click', () => startMapping('left'));
     if (mapRightBtn) mapRightBtn.addEventListener('click', () => startMapping('right'));
 
-    const handlePointer = (e) => {
-        // Agora o mouse só move o personagem se o jogo estiver ATIVO
-        if (!gameActive || !player) {
-            // Se o jogo não estiver ativo, limpamos os estados de toque para não "travar" andando
-            keys['TouchLeft'] = false;
-            keys['TouchRight'] = false;
-            return;
-        }
-
-        // Suporte para Mouse e Touch bloqueando comportamento padrão durante o jogo
-        if (e.type === 'pointerdown' || e.type === 'pointermove') {
-            const clientX = e.clientX;
-            const rect = canvas.getBoundingClientRect();
-            const x = (clientX - rect.left) * (CANVAS_WIDTH / rect.width);
-            const center = CANVAS_WIDTH / 2;
-
-            if (x < center) {
-                keys['TouchLeft'] = true;
-                keys['TouchRight'] = false;
-            } else {
-                keys['TouchRight'] = true;
-                keys['TouchLeft'] = false;
-            }
-        }
-
-        if (e.type === 'pointerup' || e.type === 'pointercancel') {
-            keys['TouchLeft'] = false;
-            keys['TouchRight'] = false;
+    // DESATIVAÇÃO TOTAL DO MOUSE/TOUCH PARA MOVIMENTO
+    const blockEvent = (e) => {
+        if (gameActive) {
+            e.preventDefault();
+            e.stopPropagation();
         }
     };
 
-    // Reativando listeners de pointer, mas com controle de gameActive dentro do handlePointer
-    canvas.addEventListener('pointerdown', (e) => {
-        if (gameActive) {
-            canvas.setPointerCapture(e.pointerId);
-            handlePointer(e);
-        }
+    // Bloqueia qualquer tentativa de interação com o canvas durante o jogo (exceto botões UI que estão acima)
+    ['mousedown', 'mousemove', 'mouseup', 'touchstart', 'touchmove', 'touchend', 'pointerdown', 'pointermove', 'pointerup'].forEach(evt => {
+        canvas.addEventListener(evt, blockEvent, { passive: false });
     });
-
-    canvas.addEventListener('pointermove', (e) => {
-        if (gameActive) handlePointer(e);
-    });
-
-    canvas.addEventListener('pointerup', (e) => {
-        if (gameActive) {
-            canvas.releasePointerCapture(e.pointerId);
-            handlePointer(e);
-        }
-    });
-
-    canvas.addEventListener('pointercancel', handlePointer);
 
     canvas.style.cursor = 'default';
-    // O cursor será ocultado apenas via código dentro de startGame() e endGame()
-
-    // Bloqueia scroll e zoom no canvas para mobile
     canvas.style.touchAction = 'none';
 
     window.addEventListener('keydown', (e) => {
