@@ -81,7 +81,7 @@ window.addEventListener('load', () => {
             },
             supportTitle: 'Ajuda & Suporte',
             helpControlsTitle: 'Controles',
-            helpControlsDesc: 'Use A/D, Setas ou clique nas laterais da tela para mover.',
+            helpControlsDesc: 'Use A/D ou as Setas do teclado para mover o personagem.',
             helpGoalTitle: 'Objetivo',
             helpGoalDesc: 'Suba o mais alto possível coletando moedas e evitando os bixos!',
             helpItemsTitle: 'Itens',
@@ -121,7 +121,7 @@ window.addEventListener('load', () => {
             },
             supportTitle: 'Help & Support',
             helpControlsTitle: 'Controls',
-            helpControlsDesc: 'Use A/D, Arrow keys or click screen sides to move.',
+            helpControlsDesc: 'Use A/D or Arrow keys to move the character.',
             helpGoalTitle: 'Goal',
             helpGoalDesc: 'Climb as high as possible collecting coins and dodging monsters!',
             helpItemsTitle: 'Items',
@@ -289,8 +289,8 @@ window.addEventListener('load', () => {
         update() {
             const currentSpeed = horizontalSpeed + this.stats.speed;
 
-            const goLeft = keys[leftKey] || keys[leftKey.toUpperCase()] || keys['ArrowLeft'] || keys['TouchLeft'];
-            const goRight = keys[rightKey] || keys[rightKey.toUpperCase()] || keys['ArrowRight'] || keys['TouchRight'];
+            const goLeft = keys[leftKey] || keys[leftKey.toUpperCase()] || keys['ArrowLeft'];
+            const goRight = keys[rightKey] || keys[rightKey.toUpperCase()] || keys['ArrowRight'];
 
             if (goLeft) this.vx = -currentSpeed;
             else if (goRight) this.vx = currentSpeed;
@@ -564,6 +564,7 @@ window.addEventListener('load', () => {
             bgMusic.play().catch(() => { });
         }
 
+        canvas.style.cursor = 'none'; // Hide cursor when game starts
         gameLoop();
     }
 
@@ -579,6 +580,7 @@ window.addEventListener('load', () => {
             localStorage.setItem('skyJumpHighScore', highScore);
             if (highScoreValueDisplay) highScoreValueDisplay.textContent = highScore;
         }
+        canvas.style.cursor = 'default'; // Show cursor when game ends
     }
 
     function renderShop() {
@@ -748,9 +750,15 @@ window.addEventListener('load', () => {
     if (mapRightBtn) mapRightBtn.addEventListener('click', () => startMapping('right'));
 
     const handlePointer = (e) => {
-        if (!gameActive || !player) return;
+        // Agora o mouse só move o personagem se o jogo estiver ATIVO
+        if (!gameActive || !player) {
+            // Se o jogo não estiver ativo, limpamos os estados de toque para não "travar" andando
+            keys['TouchLeft'] = false;
+            keys['TouchRight'] = false;
+            return;
+        }
 
-        // Suporte para Mouse e Touch bloqueando comportamento padrão
+        // Suporte para Mouse e Touch bloqueando comportamento padrão durante o jogo
         if (e.type === 'pointerdown' || e.type === 'pointermove') {
             const clientX = e.clientX;
             const rect = canvas.getBoundingClientRect();
@@ -772,20 +780,29 @@ window.addEventListener('load', () => {
         }
     };
 
-    // Usando PointerEvents para unificar Mouse e Touch de forma robusta
+    // Reativando listeners de pointer, mas com controle de gameActive dentro do handlePointer
     canvas.addEventListener('pointerdown', (e) => {
-        canvas.setPointerCapture(e.pointerId);
-        handlePointer(e);
+        if (gameActive) {
+            canvas.setPointerCapture(e.pointerId);
+            handlePointer(e);
+        }
     });
 
-    canvas.addEventListener('pointermove', handlePointer);
+    canvas.addEventListener('pointermove', (e) => {
+        if (gameActive) handlePointer(e);
+    });
 
     canvas.addEventListener('pointerup', (e) => {
-        canvas.releasePointerCapture(e.pointerId);
-        handlePointer(e);
+        if (gameActive) {
+            canvas.releasePointerCapture(e.pointerId);
+            handlePointer(e);
+        }
     });
 
     canvas.addEventListener('pointercancel', handlePointer);
+
+    canvas.style.cursor = 'default';
+    // O cursor será ocultado apenas via código dentro de startGame() e endGame()
 
     // Bloqueia scroll e zoom no canvas para mobile
     canvas.style.touchAction = 'none';
@@ -836,6 +853,26 @@ window.addEventListener('load', () => {
             return;
         }
         keys[e.key] = true;
+
+        // Inicia ou reinicia o jogo com Enter ou Espaço
+        if (e.key === 'Enter' || e.key === ' ') {
+            const isMenuVisible = !startScreen.classList.contains('hidden') || !gameOverScreen.classList.contains('hidden');
+            if (!gameActive && isMenuVisible) {
+                startGame();
+            }
+        }
+
+        // Atalhos para Loja e Configurações no Menu Inicial
+        if (!gameActive && !startScreen.classList.contains('hidden')) {
+            if (e.key.toLowerCase() === 's') {
+                startScreen.classList.add('hidden');
+                shopScreen.classList.remove('hidden');
+                renderShop();
+            } else if (e.key.toLowerCase() === 'o') {
+                startScreen.classList.add('hidden');
+                settingsScreen.classList.remove('hidden');
+            }
+        }
     });
 
     window.addEventListener('keyup', (e) => keys[e.key] = false);
