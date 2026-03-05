@@ -38,6 +38,16 @@ window.addEventListener('load', () => {
         gameOverTitle: document.getElementById('game-over-title'),
         restartBtn: document.getElementById('restart-button'),
         menuBtn: document.getElementById('menu-button'),
+        supportTitle: document.getElementById('support-title'),
+        helpControlsTitle: document.getElementById('help-controls-title'),
+        helpControlsDesc: document.getElementById('help-controls-desc'),
+        helpGoalTitle: document.getElementById('help-goal-title'),
+        helpGoalDesc: document.getElementById('help-goal-desc'),
+        helpItemsTitle: document.getElementById('help-items-title'),
+        helpItemsDesc: document.getElementById('help-items-desc'),
+        helpContactTitle: document.getElementById('help-contact-title'),
+        helpContactDesc: document.getElementById('help-contact-desc'),
+        closeSupportBtn: document.getElementById('close-support'),
         settingsTitle: document.getElementById('settings-title'),
         volumeLabel: document.getElementById('label-volume'),
         controlsLabel: document.getElementById('label-controls'),
@@ -69,6 +79,16 @@ window.addEventListener('load', () => {
                 magnet: { name: 'Porquinho Petista', ability: 'Imã Potente' },
                 gravity: { name: 'Porquinho Do Bem', ability: '-15% Gravidade' }
             },
+            supportTitle: 'Ajuda & Suporte',
+            helpControlsTitle: 'Controles',
+            helpControlsDesc: 'Use A/D, Setas ou clique nas laterais da tela para mover.',
+            helpGoalTitle: 'Objetivo',
+            helpGoalDesc: 'Suba o mais alto possível coletando moedas e evitando os bixos!',
+            helpItemsTitle: 'Itens',
+            helpItemsDesc: 'Plataformas amarelas dão super pulo. Na loja, compre skins com habilidades únicas.',
+            helpContactTitle: 'Contato & Feedback',
+            helpContactDesc: 'Gostou? Deixe seu feedback ou sugira novos bixos!',
+            closeSupportBtn: 'Voltar',
             settingsTitle: 'Configurações',
             volumeLabel: 'Volume',
             controlsLabel: 'Controles',
@@ -99,6 +119,16 @@ window.addEventListener('load', () => {
                 magnet: { name: 'Petista Piggy', ability: 'Power Magnet' },
                 gravity: { name: 'Good Piggy', ability: '-15% Gravity' }
             },
+            supportTitle: 'Help & Support',
+            helpControlsTitle: 'Controls',
+            helpControlsDesc: 'Use A/D, Arrow keys or click screen sides to move.',
+            helpGoalTitle: 'Goal',
+            helpGoalDesc: 'Climb as high as possible collecting coins and dodging monsters!',
+            helpItemsTitle: 'Items',
+            helpItemsDesc: 'Yellow platforms give a super jump. In the shop, buy skins with unique abilities.',
+            helpContactTitle: 'Contact & Feedback',
+            helpContactDesc: 'Like it? Leave feedback or suggest new monsters!',
+            closeSupportBtn: 'Back',
             settingsTitle: 'Settings',
             volumeLabel: 'Volume',
             controlsLabel: 'Controls',
@@ -182,6 +212,17 @@ window.addEventListener('load', () => {
         uiElements.gameOverTitle.textContent = lang.gameOverTitle;
         uiElements.restartBtn.textContent = lang.restartBtn;
         uiElements.menuBtn.textContent = lang.menuBtn;
+
+        uiElements.supportTitle.textContent = lang.supportTitle;
+        uiElements.helpControlsTitle.textContent = lang.helpControlsTitle;
+        uiElements.helpControlsDesc.textContent = lang.helpControlsDesc;
+        uiElements.helpGoalTitle.textContent = lang.helpGoalTitle;
+        uiElements.helpGoalDesc.textContent = lang.helpGoalDesc;
+        uiElements.helpItemsTitle.textContent = lang.helpItemsTitle;
+        uiElements.helpItemsDesc.textContent = lang.helpItemsDesc;
+        uiElements.helpContactTitle.textContent = lang.helpContactTitle;
+        uiElements.helpContactDesc.textContent = lang.helpContactDesc;
+        uiElements.closeSupportBtn.textContent = lang.closeSupportBtn;
 
         uiElements.settingsTitle.textContent = lang.settingsTitle;
         uiElements.volumeLabel.textContent = lang.volumeLabel;
@@ -379,10 +420,10 @@ window.addEventListener('load', () => {
         // Surgem após 400 pontos para dar tempo de acostumar
         if (score < 400) return;
 
-        if (enemies.length === 0 || enemies[enemies.length - 1].y > cameraY - 400) {
-            const spawnChance = Math.min(0.05 + (score / 8000), 0.15);
+        if (enemies.length === 0 || enemies[enemies.length - 1].y > cameraY - 700) {
+            const spawnChance = Math.min(0.01 + (score / 15000), 0.08);
             if (Math.random() < spawnChance) {
-                enemies.push(new Enemy(cameraY - 150));
+                enemies.push(new Enemy(cameraY - 200));
             }
         }
 
@@ -613,6 +654,24 @@ window.addEventListener('load', () => {
             });
         }
 
+        const supportButton = document.getElementById('support-button');
+        const supportScreen = document.getElementById('support-screen');
+        const closeSupportButton = document.getElementById('close-support');
+
+        if (supportButton) {
+            supportButton.addEventListener('click', () => {
+                if (startScreen) startScreen.classList.add('hidden');
+                if (supportScreen) supportScreen.classList.remove('hidden');
+            });
+        }
+
+        if (closeSupportButton) {
+            closeSupportButton.addEventListener('click', () => {
+                if (supportScreen) supportScreen.classList.add('hidden');
+                if (startScreen) startScreen.classList.remove('hidden');
+            });
+        }
+
         if (closeShopButton) {
             closeShopButton.addEventListener('click', () => {
                 if (shopScreen) shopScreen.classList.add('hidden');
@@ -697,6 +756,9 @@ window.addEventListener('load', () => {
             if (!settingsScreen.classList.contains('hidden')) {
                 settingsScreen.classList.add('hidden');
                 startScreen.classList.remove('hidden');
+            } else if (!document.getElementById('support-screen').classList.contains('hidden')) {
+                document.getElementById('support-screen').classList.add('hidden');
+                startScreen.classList.remove('hidden');
             } else if (!shopScreen.classList.contains('hidden')) {
                 shopScreen.classList.add('hidden');
                 startScreen.classList.remove('hidden');
@@ -731,10 +793,25 @@ window.addEventListener('load', () => {
 
     const handlePointerDown = (e) => {
         if (!gameActive || !player) return;
+
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
         const rect = canvas.getBoundingClientRect();
         const x = (clientX - rect.left) * (CANVAS_WIDTH / rect.width);
-        player.vx = (x < CANVAS_WIDTH / 2) ? -horizontalSpeed : horizontalSpeed;
+
+        const currentSpeed = horizontalSpeed + player.stats.speed;
+        const center = CANVAS_WIDTH / 2;
+
+        if (x < center) {
+            player.vx = -currentSpeed;
+        } else {
+            player.vx = currentSpeed;
+        }
+    };
+
+    const handlePointerMove = (e) => {
+        if (!gameActive || !player || player.vx === 0) return;
+        // Permite mudar de direção deslizando o dedo sem soltar
+        handlePointerDown(e);
     };
 
     const handlePointerUp = () => {
@@ -745,11 +822,16 @@ window.addEventListener('load', () => {
     window.addEventListener('keyup', (e) => keys[e.key] = false);
 
     canvas.addEventListener('mousedown', handlePointerDown);
+    canvas.addEventListener('mousemove', handlePointerMove);
     canvas.addEventListener('mouseup', handlePointerUp);
     window.addEventListener('mouseup', handlePointerUp);
     canvas.addEventListener('touchstart', (e) => {
         e.preventDefault();
         handlePointerDown(e);
+    }, { passive: false });
+    canvas.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+        handlePointerMove(e);
     }, { passive: false });
     canvas.addEventListener('touchend', (e) => {
         e.preventDefault();
