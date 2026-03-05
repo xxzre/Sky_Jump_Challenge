@@ -73,7 +73,13 @@ canvas {
     backdrop-filter: blur(8px);
     background: rgba(0, 0, 0, 0.4);
     transition: opacity 0.3s ease, visibility 0.3s ease;
+    pointer-events: none;
+    /* Deixa cliques passarem para os botões filhos */
+}
+
+.ui-layer>* {
     pointer-events: auto;
+    /* Garante que os filhos recebam cliques */
 }
 
 .hidden {
@@ -143,6 +149,8 @@ p {
     cursor: pointer;
     width: 200px;
     pointer-events: auto;
+    position: relative;
+    z-index: 20;
     transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.3s ease, filter 0.2s ease;
 }
 

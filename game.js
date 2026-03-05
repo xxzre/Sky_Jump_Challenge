@@ -588,78 +588,84 @@ window.addEventListener('load', () => {
 
     // Configurar Eventos
     const setupMenuListeners = () => {
-        if (startButton) startButton.onclick = startGame;
-        if (restartButton) restartButton.onclick = startGame;
+        if (startButton) {
+            startButton.addEventListener('click', startGame);
+        }
+
+        if (restartButton) {
+            restartButton.addEventListener('click', startGame);
+        }
 
         if (shopButton) {
-            shopButton.onclick = (e) => {
-                e.stopPropagation();
+            shopButton.addEventListener('click', () => {
                 if (startScreen) startScreen.classList.add('hidden');
                 if (shopScreen) shopScreen.classList.remove('hidden');
                 renderShop();
                 console.log('Shop opened');
-            };
+            });
         }
 
         if (settingsButton) {
-            settingsButton.onclick = (e) => {
-                e.stopPropagation();
+            settingsButton.addEventListener('click', () => {
                 if (startScreen) startScreen.classList.add('hidden');
                 if (settingsScreen) settingsScreen.classList.remove('hidden');
                 console.log('Settings opened');
-            };
+            });
         }
 
         if (closeShopButton) {
-            closeShopButton.onclick = () => {
+            closeShopButton.addEventListener('click', () => {
                 if (shopScreen) shopScreen.classList.add('hidden');
                 if (startScreen) startScreen.classList.remove('hidden');
-            };
+            });
         }
 
         if (uiElements.menuBtn) {
-            uiElements.menuBtn.onclick = () => {
+            uiElements.menuBtn.addEventListener('click', () => {
                 if (gameOverScreen) gameOverScreen.classList.add('hidden');
                 if (startScreen) startScreen.classList.remove('hidden');
-            };
+            });
         }
 
         // Botões de Idioma
         const btnPt = document.getElementById('btn-pt');
         const btnEn = document.getElementById('btn-en');
 
-        if (btnPt) btnPt.onclick = (e) => {
-            e.stopPropagation();
-            currentLang = 'pt';
-            updateLanguageUI();
-            if (shopScreen && !shopScreen.classList.contains('hidden')) renderShop();
-        };
+        if (btnPt) {
+            btnPt.addEventListener('click', () => {
+                currentLang = 'pt';
+                updateLanguageUI();
+                if (shopScreen && !shopScreen.classList.contains('hidden')) renderShop();
+            });
+        }
 
-        if (btnEn) btnEn.onclick = (e) => {
-            e.stopPropagation();
-            currentLang = 'en';
-            updateLanguageUI();
-            if (shopScreen && !shopScreen.classList.contains('hidden')) renderShop();
-        };
+        if (btnEn) {
+            btnEn.addEventListener('click', () => {
+                currentLang = 'en';
+                updateLanguageUI();
+                if (shopScreen && !shopScreen.classList.contains('hidden')) renderShop();
+            });
+        }
     };
 
     setupMenuListeners();
 
     // Eventos de Configurações
     if (closeSettingsButton) {
-        closeSettingsButton.onclick = () => {
+        closeSettingsButton.addEventListener('click', () => {
             if (settingsScreen) settingsScreen.classList.add('hidden');
             if (startScreen) startScreen.classList.remove('hidden');
             isMapping = null;
             updateLanguageUI();
-        };
+            console.log('Settings closed');
+        });
     }
 
     if (volumeControl) {
-        volumeControl.oninput = (e) => {
+        volumeControl.addEventListener('input', (e) => {
             if (bgMusic) bgMusic.volume = e.target.value;
             localStorage.setItem('skyJumpVolume', e.target.value);
-        };
+        });
         // Inicializa volume
         const savedVol = localStorage.getItem('skyJumpVolume') || 0.5;
         volumeControl.value = savedVol;
@@ -675,8 +681,8 @@ window.addEventListener('load', () => {
         if (side === 'right') mapRightBtn.classList.add('waiting');
     };
 
-    if (mapLeftBtn) mapLeftBtn.onclick = () => startMapping('left');
-    if (mapRightBtn) mapRightBtn.onclick = () => startMapping('right');
+    if (mapLeftBtn) mapLeftBtn.addEventListener('click', () => startMapping('left'));
+    if (mapRightBtn) mapRightBtn.addEventListener('click', () => startMapping('right'));
 
     window.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
