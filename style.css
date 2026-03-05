@@ -165,6 +165,103 @@ p {
     margin-bottom: 30px;
 }
 
+.side-buttons {
+    display: flex;
+    gap: 10px;
+    width: 200px;
+}
+
+.btn.small {
+    flex: 1;
+    padding: 10px;
+    font-size: 0.9rem;
+    width: auto;
+}
+
+.settings-group {
+    width: 80%;
+    margin-bottom: 25px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.settings-group label {
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+input[type="range"] {
+    width: 100%;
+    accent-color: var(--primary);
+}
+
+.key-mappers {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+}
+
+.key-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.key-box span {
+    font-size: 0.7rem;
+    opacity: 0.6;
+}
+
+.key-btn {
+    background: var(--glass);
+    border: 2px solid var(--glass-border);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-weight: 800;
+    min-width: 60px;
+    cursor: pointer;
+}
+
+.key-btn.waiting {
+    border-color: var(--accent);
+    box-shadow: 0 0 10px var(--accent);
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.lang-selector {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 25px;
+}
+
+.lang-btn {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    color: white;
+    padding: 8px 15px;
+    border-radius: 15px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.lang-btn.active {
+    background: var(--primary);
+    border-color: var(--primary-light);
+    box-shadow: 0 0 10px var(--primary);
+}
+
 .skin-container {
     display: flex;
     flex-direction: column;
