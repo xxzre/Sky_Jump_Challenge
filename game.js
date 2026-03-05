@@ -320,7 +320,7 @@ window.addEventListener('load', () => {
             this.x = Math.random() * (CANVAS_WIDTH - this.width);
             this.y = y;
             this.type = (!isFirst && Math.random() < 0.15) ? 'BOOST' : 'NORMAL';
-            this.hasCoin = (!isFirst && this.type === 'NORMAL' && Math.random() < 0.25);
+            this.hasCoin = (!isFirst && Math.random() < 0.5); // Chance aumentada de 25% para 50% e agora em todas as plataformas
             this.coinCollected = false;
         }
 
