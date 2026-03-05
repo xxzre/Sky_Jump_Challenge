@@ -209,6 +209,18 @@ window.addEventListener('load', () => {
             ctx.beginPath();
             ctx.arc(0, 0, 18, 0, Math.PI * 2);
             ctx.fill();
+
+            // Espinhos (novidade do prompt)
+            ctx.strokeStyle = '#4a148c';
+            ctx.lineWidth = 2;
+            for (let i = 0; i < 6; i++) {
+                const angle = (i / 6) * Math.PI * 2 + this.pulse * 0.5;
+                ctx.beginPath();
+                ctx.moveTo(Math.cos(angle) * 15, Math.sin(angle) * 15);
+                ctx.lineTo(Math.cos(angle) * 25, Math.sin(angle) * 25);
+                ctx.stroke();
+            }
+
             // Olho vermelho malvado
             ctx.fillStyle = 'white';
             ctx.beginPath();
