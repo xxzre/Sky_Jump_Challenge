@@ -12,6 +12,9 @@ window.addEventListener('load', () => {
     const startScreen = document.getElementById('start-screen');
     const shopScreen = document.getElementById('shop-screen');
     const gameOverScreen = document.getElementById('game-over-screen');
+    const startButton = document.getElementById('start-button');
+    const shopButton = document.getElementById('shop-button');
+    const closeShopButton = document.getElementById('close-shop');
     const restartButton = document.getElementById('restart-button');
     const settingsButton = document.getElementById('settings-button');
     const closeSettingsButton = document.getElementById('close-settings');
@@ -584,50 +587,65 @@ window.addEventListener('load', () => {
     }
 
     // Configurar Eventos
-    if (startButton) startButton.onclick = startGame;
-    if (restartButton) restartButton.onclick = startGame;
+    const setupMenuListeners = () => {
+        if (startButton) startButton.onclick = startGame;
+        if (restartButton) restartButton.onclick = startGame;
 
-    // Botões de Idioma
-    document.getElementById('btn-pt').onclick = () => {
-        currentLang = 'pt';
-        updateLanguageUI();
-        if (shopScreen && !shopScreen.classList.contains('hidden')) renderShop();
+        if (shopButton) {
+            shopButton.onclick = (e) => {
+                e.stopPropagation();
+                if (startScreen) startScreen.classList.add('hidden');
+                if (shopScreen) shopScreen.classList.remove('hidden');
+                renderShop();
+                console.log('Shop opened');
+            };
+        }
+
+        if (settingsButton) {
+            settingsButton.onclick = (e) => {
+                e.stopPropagation();
+                if (startScreen) startScreen.classList.add('hidden');
+                if (settingsScreen) settingsScreen.classList.remove('hidden');
+                console.log('Settings opened');
+            };
+        }
+
+        if (closeShopButton) {
+            closeShopButton.onclick = () => {
+                if (shopScreen) shopScreen.classList.add('hidden');
+                if (startScreen) startScreen.classList.remove('hidden');
+            };
+        }
+
+        if (uiElements.menuBtn) {
+            uiElements.menuBtn.onclick = () => {
+                if (gameOverScreen) gameOverScreen.classList.add('hidden');
+                if (startScreen) startScreen.classList.remove('hidden');
+            };
+        }
+
+        // Botões de Idioma
+        const btnPt = document.getElementById('btn-pt');
+        const btnEn = document.getElementById('btn-en');
+
+        if (btnPt) btnPt.onclick = (e) => {
+            e.stopPropagation();
+            currentLang = 'pt';
+            updateLanguageUI();
+            if (shopScreen && !shopScreen.classList.contains('hidden')) renderShop();
+        };
+
+        if (btnEn) btnEn.onclick = (e) => {
+            e.stopPropagation();
+            currentLang = 'en';
+            updateLanguageUI();
+            if (shopScreen && !shopScreen.classList.contains('hidden')) renderShop();
+        };
     };
 
-    document.getElementById('btn-en').onclick = () => {
-        currentLang = 'en';
-        updateLanguageUI();
-        if (shopScreen && !shopScreen.classList.contains('hidden')) renderShop();
-    };
-
-    if (shopButton) {
-        shopButton.onclick = () => {
-            if (startScreen) startScreen.classList.add('hidden');
-            if (shopScreen) shopScreen.classList.remove('hidden');
-            renderShop();
-        };
-    }
-    if (closeShopButton) {
-        closeShopButton.onclick = () => {
-            if (shopScreen) shopScreen.classList.add('hidden');
-            if (startScreen) startScreen.classList.remove('hidden');
-        };
-    }
-    if (uiElements.menuBtn) {
-        uiElements.menuBtn.onclick = () => {
-            if (gameOverScreen) gameOverScreen.classList.add('hidden');
-            if (startScreen) startScreen.classList.remove('hidden');
-        };
-    }
+    setupMenuListeners();
 
     // Eventos de Configurações
-    if (settingsButton) {
-        settingsButton.onclick = () => {
-            if (startScreen) startScreen.classList.add('hidden');
-            if (settingsScreen) settingsScreen.classList.remove('hidden');
-        };
-    }
-
     if (closeSettingsButton) {
         closeSettingsButton.onclick = () => {
             if (settingsScreen) settingsScreen.classList.add('hidden');
