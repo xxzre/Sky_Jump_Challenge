@@ -419,17 +419,18 @@ window.addEventListener('load', () => {
     function spawnEnemies() {
         if (score < 400) return;
 
-        const spawnY = cameraY - 300;
-        const minDistance = 1500; // Distância mínima entre bixos
+        const spawnY = cameraY - 400;
+        const minDistance = 2000; // Distância mínima ainda maior entre bixos
 
-        if (enemies.length === 0 || Math.abs(enemies[enemies.length - 1].y - spawnY) > minDistance) {
-            const spawnChance = Math.min(0.005 + (score / 30000), 0.04);
+        // Verifica se o último bixo está longe o suficiente
+        if (enemies.length === 0 || (enemies[enemies.length - 1].y > spawnY + minDistance)) {
+            const spawnChance = Math.min(0.002 + (score / 40000), 0.03);
             if (Math.random() < spawnChance) {
                 enemies.push(new Enemy(spawnY));
             }
         }
 
-        if (enemies.length > 0 && enemies[0].y - cameraY > CANVAS_HEIGHT + 200) {
+        if (enemies.length > 0 && enemies[0].y - cameraY > CANVAS_HEIGHT + 300) {
             enemies.shift();
         }
     }
@@ -532,6 +533,7 @@ window.addEventListener('load', () => {
     }
 
     function startGame() {
+        if (animationId) cancelAnimationFrame(animationId);
         gameActive = true;
         player = new Player();
         score = 0;
@@ -745,6 +747,49 @@ window.addEventListener('load', () => {
     if (mapLeftBtn) mapLeftBtn.addEventListener('click', () => startMapping('left'));
     if (mapRightBtn) mapRightBtn.addEventListener('click', () => startMapping('right'));
 
+    const handlePointer = (e) => {
+        if (!gameActive || !player) return;
+
+        // Suporte para Mouse e Touch bloqueando comportamento padrão
+        if (e.type === 'pointerdown' || e.type === 'pointermove') {
+            const clientX = e.clientX;
+            const rect = canvas.getBoundingClientRect();
+            const x = (clientX - rect.left) * (CANVAS_WIDTH / rect.width);
+            const center = CANVAS_WIDTH / 2;
+
+            if (x < center) {
+                keys['TouchLeft'] = true;
+                keys['TouchRight'] = false;
+            } else {
+                keys['TouchRight'] = true;
+                keys['TouchLeft'] = false;
+            }
+        }
+
+        if (e.type === 'pointerup' || e.type === 'pointercancel') {
+            keys['TouchLeft'] = false;
+            keys['TouchRight'] = false;
+        }
+    };
+
+    // Usando PointerEvents para unificar Mouse e Touch de forma robusta
+    canvas.addEventListener('pointerdown', (e) => {
+        canvas.setPointerCapture(e.pointerId);
+        handlePointer(e);
+    });
+
+    canvas.addEventListener('pointermove', handlePointer);
+
+    canvas.addEventListener('pointerup', (e) => {
+        canvas.releasePointerCapture(e.pointerId);
+        handlePointer(e);
+    });
+
+    canvas.addEventListener('pointercancel', handlePointer);
+
+    // Bloqueia scroll e zoom no canvas para mobile
+    canvas.style.touchAction = 'none';
+
     window.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
             if (isMapping) {
@@ -793,56 +838,7 @@ window.addEventListener('load', () => {
         keys[e.key] = true;
     });
 
-    const handlePointerDown = (e) => {
-        if (!gameActive || !player) return;
-
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        const rect = canvas.getBoundingClientRect();
-        const x = (clientX - rect.left) * (CANVAS_WIDTH / rect.width);
-
-        const center = CANVAS_WIDTH / 2;
-
-        if (x < center) {
-            keys['TouchLeft'] = true;
-            keys['TouchRight'] = false;
-        } else {
-            keys['TouchRight'] = true;
-            keys['TouchLeft'] = false;
-        }
-    };
-
-    const handlePointerMove = (e) => {
-        if (!gameActive || !player) return;
-        // Se já houver um toque ativo, atualiza a direção conforme o deslize
-        if (keys['TouchLeft'] || keys['TouchRight']) {
-            handlePointerDown(e);
-        }
-    };
-
-    const handlePointerUp = () => {
-        keys['TouchLeft'] = false;
-        keys['TouchRight'] = false;
-    };
-
-    window.addEventListener('keydown', (e) => keys[e.key] = true);
     window.addEventListener('keyup', (e) => keys[e.key] = false);
-
-    canvas.addEventListener('mousedown', handlePointerDown);
-    canvas.addEventListener('mousemove', handlePointerMove);
-    canvas.addEventListener('mouseup', handlePointerUp);
-    window.addEventListener('mouseup', handlePointerUp);
-    canvas.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        handlePointerDown(e);
-    }, { passive: false });
-    canvas.addEventListener('touchmove', (e) => {
-        e.preventDefault();
-        handlePointerMove(e);
-    }, { passive: false });
-    canvas.addEventListener('touchend', (e) => {
-        e.preventDefault();
-        handlePointerUp();
-    }, { passive: false });
 
     canvas.width = CANVAS_WIDTH;
     canvas.height = CANVAS_HEIGHT;
