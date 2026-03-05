@@ -420,10 +420,10 @@ window.addEventListener('load', () => {
         // Surgem após 400 pontos para dar tempo de acostumar
         if (score < 400) return;
 
-        if (enemies.length === 0 || enemies[enemies.length - 1].y > cameraY - 700) {
-            const spawnChance = Math.min(0.01 + (score / 15000), 0.08);
+        if (enemies.length === 0 || enemies[enemies.length - 1].y > cameraY - 1200) {
+            const spawnChance = Math.min(0.005 + (score / 25000), 0.05);
             if (Math.random() < spawnChance) {
-                enemies.push(new Enemy(cameraY - 200));
+                enemies.push(new Enemy(cameraY - 250));
             }
         }
 
