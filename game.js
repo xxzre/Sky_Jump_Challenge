@@ -32,11 +32,11 @@ window.addEventListener('load', () => {
 
     // Skins e Habilidades
     const SKINS = [
-        { id: 'default', name: 'Porquinho Rosa', color: '#ffb6c1', imgSrc: 'assets/Porquinho_da_Sorte.png', price: 0, ability: 'Padrão', stats: { gravity: 0, speed: 0, jump: 0, magnet: 40 } },
-        { id: 'neon', name: 'Neon Runner', color: '#00e5ff', price: 50, ability: '+25% Velocidade', stats: { gravity: 0, speed: 1.5, jump: 0, magnet: 40 } },
-        { id: 'jump', name: 'Super Hopper', color: '#ff4081', price: 100, ability: '+15% Pulo', stats: { gravity: 0, speed: 0, jump: -3, magnet: 40 } },
-        { id: 'magnet', name: 'Imã de Moedas', color: '#ffea00', price: 150, ability: 'Imã Potente', stats: { gravity: 0, speed: 0, jump: 0, magnet: 120 } },
-        { id: 'gravity', name: 'Astronauta', color: '#ffffff', price: 200, ability: '-15% Gravidade', stats: { gravity: -0.05, speed: 0, jump: 0, magnet: 45 } }
+        { id: 'default', name: 'Porquinho Gay', color: '#ffb6c1', imgSrc: 'assets/Porquinho_Da_Sorte_Gay.png', price: 0, ability: 'Padrão', stats: { gravity: 0, speed: 0, jump: 0, magnet: 40 } },
+        { id: 'neon', name: 'Porquinho Preto', color: '#000000ff', price: 50, ability: '+25% Velocidade', stats: { gravity: 0, speed: 1.5, jump: 0, magnet: 40 } },
+        { id: 'jump', name: 'Porquinho Petista', color: '#ff0202ff', price: 100, ability: '+15% Pulo', stats: { gravity: 0, speed: 0, jump: -3, magnet: 40 } },
+        { id: 'magnet', name: 'Porquinho Bolsonarista', color: '#eeff00ff', price: 150, ability: 'Super Buff (+15% Tudo)', stats: { gravity: -0.0575, speed: 1.725, jump: -3.45, magnet: 138 } },
+        { id: 'gravity', name: 'Porquinho Do Bem', color: '#ffffff', price: 200, ability: '-15% Gravidade', stats: { gravity: -0.05, speed: 0, jump: 0, magnet: 45 } }
     ];
 
     // Estado do Jogo
