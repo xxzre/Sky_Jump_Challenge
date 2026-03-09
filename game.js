@@ -75,7 +75,7 @@ window.addEventListener('load', () => {
             skins: {
                 default: { name: 'Porquinho Gay', ability: 'Padrão' },
                 neon: { name: 'Porquinho Preto', ability: '+25% Velocidade' },
-                jump: { name: 'Porquinho Do Mirassol', ability: '+15% Pulo' },
+                jump: { name: 'Porquinho Bolsonarista', ability: 'Super Buff (+15% Tudo)' },
                 magnet: { name: 'Porquinho Petista', ability: 'Imã Potente' },
                 gravity: { name: 'Porquinho Do Bem', ability: '-15% Gravidade' }
             },
@@ -115,7 +115,7 @@ window.addEventListener('load', () => {
             skins: {
                 default: { name: 'Gay Piggy', ability: 'Standard' },
                 neon: { name: 'Black Piggy', ability: '+25% Speed' },
-                jump: { name: 'Mirassol Piggy', ability: '+15% Jump' },
+                jump: { name: 'Bolsonarista Piggy', ability: 'Super Buff (+15% All)' },
                 magnet: { name: 'Petista Piggy', ability: 'Power Magnet' },
                 gravity: { name: 'Good Piggy', ability: '-15% Gravity' }
             },
@@ -159,8 +159,8 @@ window.addEventListener('load', () => {
     const SKINS = [
         { id: 'default', color: '#ffb6c1', imgSrc: 'assets/Porquinho_Da_Sorte_Gay.png', price: 0, stats: { gravity: 0, speed: 0, jump: 0, magnet: 40 } },
         { id: 'neon', color: '#000000ff', imgSrc: 'assets/Porquinho_Da_Sorte_Preto.png', price: 50, stats: { gravity: 0, speed: 1.5, jump: 0, magnet: 40 } },
-        { id: 'jump', color: '#ffe600ff', imgSrc: 'assets/Porquinho_Da_Sorte_Mirassol.png', price: 100, stats: { gravity: 0, speed: 0, jump: -3, magnet: 40 } },
-        { id: 'magnet', color: '#ff0000ff', imgSrc: 'assets/Porquinho_da_Sorte_PT.png?v=1', price: 150, stats: { gravity: 0, speed: 0, jump: 0, magnet: 120 } },
+        { id: 'jump', color: '#eeff00ff', imgSrc: 'assets/Porquinho_da_Sorte_Bolsonaro.png', price: 100, stats: { gravity: -0.0575, speed: 1.725, jump: -3.45, magnet: 138 } },
+        { id: 'magnet', color: '#ff0000ff', imgSrc: 'assets/Porquinho_da_Sorte_PT.png', price: 150, stats: { gravity: 0, speed: 0, jump: 0, magnet: 120 } },
         { id: 'gravity', color: '#ffffff', imgSrc: 'assets/Porquinho_Da_Sorte_Branco.png', price: 200, stats: { gravity: -0.05, speed: 0, jump: 0, magnet: 45 } }
     ];
 
