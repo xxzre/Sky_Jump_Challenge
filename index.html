@@ -24,84 +24,40 @@
                 <div class="coin-icon"></div>
                 <span id="coin-count">0</span>
             </div>
+            <div class="stat-box">
+                <span>Best:</span>
+                <span id="high-score-game">0</span>
+            </div>
         </div>
 
         <canvas id="gameCanvas"></canvas>
 
         <!-- Start Screen -->
         <div id="start-screen" class="ui-layer">
-            <h1 id="main-title" class="floating">Escalada no Dinheiro</h1>
-            <p id="main-subtitle">O lucro não tem limites</p>
-
-            <div class="lang-selector">
-                <button id="btn-pt" class="lang-btn active">🇧🇷 PT</button>
-                <button id="btn-en" class="lang-btn">🇺🇸 EN</button>
-            </div>
-
+            <h1 class="floating">Escalada no Dinheiro</h1>
+            <p>O lucro não tem limites</p>
             <div class="menu-buttons">
                 <button id="start-button" class="btn">Play Now</button>
-                <div class="side-buttons">
-                    <button id="shop-button" class="btn secondary small">Item Shop</button>
-                    <button id="settings-button" class="btn secondary small">⚙️</button>
-                    <button id="support-button" class="btn secondary small">?</button>
+                <div class="side-buttons-row">
+                    <button id="shop-button" class="btn secondary">Shop</button>
+                    <button id="worlds-button" class="btn secondary">Worlds</button>
                 </div>
             </div>
-            <div class="high-score-label"><span id="best-label">Best</span>: <span id="high-score-value">0</span></div>
+            <div class="high-score-label">Best: <span id="high-score-value">0</span></div>
         </div>
 
-        <div id="support-screen" class="ui-layer hidden">
-            <h1 id="support-title">Ajuda & Suporte</h1>
-            <div class="support-content">
-                <div class="support-item">
-                    <h2 id="help-controls-title">Controles</h2>
-                    <p id="help-controls-desc">Use A/D, Setas ou clique nas laterais da tela para mover.</p>
-                </div>
-                <div class="support-item">
-                    <h2 id="help-goal-title">Objetivo</h2>
-                    <p id="help-goal-desc">Suba o mais alto possível coletando moedas e evitando os bixos!</p>
-                </div>
-                <div class="support-item">
-                    <h2 id="help-items-title">Itens</h2>
-                    <p id="help-items-desc">Plataformas amarelas dão super pulo. Na loja, compre skins com habilidades
-                        únicas.</p>
-                </div>
-                <div class="support-item">
-                    <h2 id="help-contact-title">Contato & Feedback</h2>
-                    <p id="help-contact-desc">Gostou? Deixe seu feedback ou sugira novos bixos!</p>
-                </div>
+        <!-- Worlds Screen -->
+        <div id="worlds-screen" class="ui-layer hidden">
+            <h1>Select World</h1>
+            <div id="world-list" class="skin-container">
+                <!-- Worlds will be injected here via JS -->
             </div>
-            <button id="close-support" class="btn secondary">Voltar</button>
-        </div>
-
-        <!-- Settings Screen -->
-        <div id="settings-screen" class="ui-layer hidden">
-            <h1 id="settings-title">Configurações</h1>
-
-            <div class="settings-group">
-                <label id="label-volume">Volume</label>
-                <input type="range" id="volume-control" min="0" max="1" step="0.1" value="0.5">
-            </div>
-
-            <div class="settings-group">
-                <label id="label-controls">Controles</label>
-                <div class="key-mappers">
-                    <div class="key-box">
-                        <span id="label-left">Esquerda</span>
-                        <button id="map-left" class="key-btn">A</button>
-                    </div>
-                    <div class="key-box">
-                        <span id="label-right">Direita</span>
-                        <button id="map-right" class="key-btn">D</button>
-                    </div>
-                </div>
-            </div>
-
-            <button id="close-settings" class="btn secondary">Voltar</button>
+            <button id="close-worlds" class="btn secondary">Back to Menu</button>
         </div>
 
         <!-- Shop Screen -->
         <div id="shop-screen" class="ui-layer hidden">
-            <h1 id="shop-title">Mercado de Skins</h1>
+            <h1>Mercado de Skins</h1>
             <div id="skin-list" class="skin-container">
                 <!-- Skins will be injected here via JS -->
             </div>
@@ -110,7 +66,7 @@
 
         <!-- Game Over Screen -->
         <div id="game-over-screen" class="ui-layer hidden">
-            <h1 id="game-over-title">Game Over</h1>
+            <h1>Game Over</h1>
             <p id="final-score">Score: 0</p>
             <div class="menu-buttons">
                 <button id="restart-button" class="btn">New Flight</button>
@@ -119,11 +75,14 @@
         </div>
     </div>
 
+    <!-- Notification System -->
+    <div id="notification" class="notification hidden"></div>
+
     <audio id="bg-music" loop>
         <!-- Placeholder for music if added later -->
     </audio>
 
-    <script src="game.js?v=2"></script>
+    <script src="game.js"></script>
 </body>
 
 </html>

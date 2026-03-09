@@ -8,6 +8,7 @@ window.addEventListener('load', () => {
     const ctx = canvas.getContext('2d');
     const scoreValueDisplay = document.getElementById('score-value');
     const highScoreValueDisplay = document.getElementById('high-score-value');
+    const highScoreGameDisplay = document.getElementById('high-score-game');
     const finalScoreDisplay = document.getElementById('final-score');
     const startScreen = document.getElementById('start-screen');
     const shopScreen = document.getElementById('shop-screen');
@@ -16,135 +17,15 @@ window.addEventListener('load', () => {
     const shopButton = document.getElementById('shop-button');
     const closeShopButton = document.getElementById('close-shop');
     const restartButton = document.getElementById('restart-button');
-    const settingsButton = document.getElementById('settings-button');
-    const closeSettingsButton = document.getElementById('close-settings');
-    const settingsScreen = document.getElementById('settings-screen');
-    const volumeControl = document.getElementById('volume-control');
-    const mapLeftBtn = document.getElementById('map-left');
-    const mapRightBtn = document.getElementById('map-right');
+    const menuButton = document.getElementById('menu-button');
+    const worldsButton = document.getElementById('worlds-button');
+    const worldsScreen = document.getElementById('worlds-screen');
+    const closeWorldsButton = document.getElementById('close-worlds');
+    const worldListContainer = document.getElementById('world-list');
     const coinDisplay = document.getElementById('coin-count');
+    const notification = document.getElementById('notification');
     const skinListContainer = document.getElementById('skin-list');
     const bgMusic = document.getElementById('bg-music');
-
-    // Elementos de Tradução
-    const uiElements = {
-        title: document.getElementById('main-title'),
-        subtitle: document.getElementById('main-subtitle'),
-        startBtn: document.getElementById('start-button'),
-        shopBtn: document.getElementById('shop-button'),
-        bestLabel: document.getElementById('best-label'),
-        shopTitle: document.getElementById('shop-title'),
-        closeShopBtn: document.getElementById('close-shop'),
-        gameOverTitle: document.getElementById('game-over-title'),
-        restartBtn: document.getElementById('restart-button'),
-        menuBtn: document.getElementById('menu-button'),
-        supportTitle: document.getElementById('support-title'),
-        helpControlsTitle: document.getElementById('help-controls-title'),
-        helpControlsDesc: document.getElementById('help-controls-desc'),
-        helpGoalTitle: document.getElementById('help-goal-title'),
-        helpGoalDesc: document.getElementById('help-goal-desc'),
-        helpItemsTitle: document.getElementById('help-items-title'),
-        helpItemsDesc: document.getElementById('help-items-desc'),
-        helpContactTitle: document.getElementById('help-contact-title'),
-        helpContactDesc: document.getElementById('help-contact-desc'),
-        closeSupportBtn: document.getElementById('close-support'),
-        settingsTitle: document.getElementById('settings-title'),
-        volumeLabel: document.getElementById('label-volume'),
-        controlsLabel: document.getElementById('label-controls'),
-        leftLabel: document.getElementById('label-left'),
-        rightLabel: document.getElementById('label-right'),
-        closeSettingsBtn: document.getElementById('close-settings')
-    };
-
-    const TRANSLATIONS = {
-        pt: {
-            title: 'Escalada no Dinheiro',
-            subtitle: 'O lucro não tem limites',
-            startBtn: 'Jogar Agora',
-            shopBtn: 'Loja de Itens',
-            bestLabel: 'Melhor',
-            shopTitle: 'Mercado de Skins',
-            closeShopBtn: 'Voltar ao Menu',
-            gameOverTitle: 'Fim de Jogo',
-            restartBtn: 'Novo Vôo',
-            menuBtn: 'Menu Principal',
-            scorePrefix: 'Pontuação: ',
-            coinsSuffix: ' moedas',
-            active: 'Ativo',
-            select: 'Selecionar',
-            skins: {
-                default: { name: 'Porquinho Gay', ability: 'Padrão' },
-                neon: { name: 'Porquinho Preto', ability: '+25% Velocidade' },
-                jump: { name: 'Porquinho Bolsonarista', ability: 'Super Buff (+15% Tudo)' },
-                magnet: { name: 'Porquinho Petista', ability: 'Imã Potente' },
-                gravity: { name: 'Porquinho Do Bem', ability: '-15% Gravidade' }
-            },
-            supportTitle: 'Ajuda & Suporte',
-            helpControlsTitle: 'Controles',
-            helpControlsDesc: 'Use A/D ou as Setas do teclado para mover o personagem.',
-            helpGoalTitle: 'Objetivo',
-            helpGoalDesc: 'Suba o mais alto possível coletando moedas e evitando os bixos!',
-            helpItemsTitle: 'Itens',
-            helpItemsDesc: 'Plataformas amarelas dão super pulo. Na loja, compre skins com habilidades únicas.',
-            helpContactTitle: 'Contato & Feedback',
-            helpContactDesc: 'Gostou? Deixe seu feedback ou sugira novos bixos!',
-            closeSupportBtn: 'Voltar',
-            settingsTitle: 'Configurações',
-            volumeLabel: 'Volume',
-            controlsLabel: 'Controles',
-            leftLabel: 'Esquerda',
-            rightLabel: 'Direita',
-            closeSettingsBtn: 'Voltar',
-            pressKey: 'Pressione uma tecla...'
-        },
-        en: {
-            title: 'Money Climb',
-            subtitle: 'Profits have no limits',
-            startBtn: 'Play Now',
-            shopBtn: 'Item Shop',
-            bestLabel: 'Best',
-            shopTitle: 'Skin Market',
-            closeShopBtn: 'Back to Menu',
-            gameOverTitle: 'Game Over',
-            restartBtn: 'New Flight',
-            menuBtn: 'Main Menu',
-            scorePrefix: 'Score: ',
-            coinsSuffix: ' coins',
-            active: 'Active',
-            select: 'Select',
-            skins: {
-                default: { name: 'Gay Piggy', ability: 'Standard' },
-                neon: { name: 'Black Piggy', ability: '+25% Speed' },
-                jump: { name: 'Bolsonarista Piggy', ability: 'Super Buff (+15% All)' },
-                magnet: { name: 'Petista Piggy', ability: 'Power Magnet' },
-                gravity: { name: 'Good Piggy', ability: '-15% Gravity' }
-            },
-            supportTitle: 'Help & Support',
-            helpControlsTitle: 'Controls',
-            helpControlsDesc: 'Use A/D or Arrow keys to move the character.',
-            helpGoalTitle: 'Goal',
-            helpGoalDesc: 'Climb as high as possible collecting coins and dodging monsters!',
-            helpItemsTitle: 'Items',
-            helpItemsDesc: 'Yellow platforms give a super jump. In the shop, buy skins with unique abilities.',
-            helpContactTitle: 'Contact & Feedback',
-            helpContactDesc: 'Like it? Leave feedback or suggest new monsters!',
-            closeSupportBtn: 'Back',
-            settingsTitle: 'Settings',
-            volumeLabel: 'Volume',
-            controlsLabel: 'Controls',
-            leftLabel: 'Left',
-            rightLabel: 'Right',
-            closeSettingsBtn: 'Back',
-            pressKey: 'Press a key...'
-        }
-    };
-
-    let currentLang = localStorage.getItem('skyJumpLang') || 'pt';
-
-    // Controles Customizados
-    let leftKey = localStorage.getItem('skyJumpKeyLeft') || 'a';
-    let rightKey = localStorage.getItem('skyJumpKeyRight') || 'd';
-    let isMapping = null; // 'left' ou 'right'
 
     // Configurações e Física
     const CANVAS_WIDTH = 400;
@@ -157,11 +38,16 @@ window.addEventListener('load', () => {
 
     // Skins e Habilidades
     const SKINS = [
-        { id: 'default', color: '#ffb6c1', imgSrc: 'assets/Porquinho_Da_Sorte_Gay.png', price: 0, stats: { gravity: 0, speed: 0, jump: 0, magnet: 40 } },
-        { id: 'neon', color: '#000000ff', imgSrc: 'assets/Porquinho_Da_Sorte_Preto.png', price: 50, stats: { gravity: 0, speed: 1.5, jump: 0, magnet: 40 } },
-        { id: 'jump', color: '#eeff00ff', imgSrc: 'assets/Porquinho_da_Sorte_Bolsonaro.png', price: 100, stats: { gravity: -0.0575, speed: 1.725, jump: -3.45, magnet: 138 } },
-        { id: 'magnet', color: '#ff0000ff', imgSrc: 'assets/Porquinho_da_Sorte_PT.png', price: 150, stats: { gravity: 0, speed: 0, jump: 0, magnet: 120 } },
-        { id: 'gravity', color: '#ffffff', imgSrc: 'assets/Porquinho_Da_Sorte_Branco.png', price: 200, stats: { gravity: -0.05, speed: 0, jump: 0, magnet: 45 } }
+        { id: 'default', name: 'Porquinho Gay', color: '#ffb6c1', imgSrc: 'assets/Porquinho_Da_Sorte_Gay.png', price: 0, ability: 'Padrão', stats: { gravity: 0, speed: 0, jump: 0, magnet: 40 } },
+        { id: 'neon', name: 'Porquinho Preto', color: '#000000ff', imgSrc: 'assets/Porquinho_Da_Sorte_Preto.png', price: 50, ability: '+25% Velocidade', stats: { gravity: 0, speed: 1.5, jump: 0, magnet: 40 } },
+        { id: 'jump', name: 'Porquinho do Bolsonaro', color: '#ffe600ff', imgSrc: 'assets/Porquinho_Da_Sorte_Bolsonarista.png', price: 100, ability: 'Super Buff (+15% Tudo)', stats: { gravity: -0.0525, speed: 0.9, jump: -1.8, magnet: 46 } },
+        { id: 'magnet', name: 'Porquinho Petista', color: '#ff0000ff', imgSrc: 'assets/Porquinho_da_Sorte_PT.png?v=1', price: 150, ability: 'Imã Potente', stats: { gravity: 0, speed: 0, jump: 0, magnet: 120 } },
+        { id: 'gravity', name: 'Porquinho Do Bem', color: '#ffffff', imgSrc: 'assets/Porquinho_Da_Sorte_Branco.png', price: 200, ability: '-15% Gravidade', stats: { gravity: -0.05, speed: 0, jump: 0, magnet: 45 } }
+    ];
+
+    const WORLDS = [
+        { id: 'classic', name: 'Mundo Clássico', price: 0, colors: { SKY: { r: 135, g: 206, b: 235 }, DEEP: { r: 26, g: 35, b: 126 }, SPACE: { r: 0, g: 0, b: 51 } } },
+        { id: 'neon', name: 'Cidade Neon', price: 1000, colors: { SKY: { r: 40, g: 0, b: 80 }, DEEP: { r: 0, g: 0, b: 30 }, SPACE: { r: 0, g: 0, b: 0 } } }
     ];
 
     // Estado do Jogo
@@ -188,61 +74,33 @@ window.addEventListener('load', () => {
     }
     let activeSkinId = localStorage.getItem('skyJumpActiveSkin') || 'default';
 
+    // Mundos
+    let purchasedWorlds = JSON.parse(localStorage.getItem('skyJumpWorlds')) || ['classic'];
+    let activeWorldId = localStorage.getItem('skyJumpActiveWorld') || 'classic';
+
     // Transições de Cores
-    const COLORS = {
-        SKY: { r: 135, g: 206, b: 235 },
-        DEEP: { r: 26, g: 35, b: 126 },
-        SPACE: { r: 0, g: 0, b: 51 }
-    };
+    function getActiveWorldColors() {
+        const world = WORLDS.find(w => w.id === activeWorldId) || WORLDS[0];
+        return world.colors;
+    }
 
     // UI Inicial
-    updateLanguageUI();
     if (highScoreValueDisplay) highScoreValueDisplay.textContent = highScore;
+    if (highScoreGameDisplay) highScoreGameDisplay.textContent = highScore;
     updateCoinUI();
-
-    function updateLanguageUI() {
-        const lang = TRANSLATIONS[currentLang];
-        uiElements.title.textContent = lang.title;
-        uiElements.subtitle.textContent = lang.subtitle;
-        uiElements.startBtn.textContent = lang.startBtn;
-        uiElements.shopBtn.textContent = lang.shopBtn;
-        uiElements.bestLabel.textContent = lang.bestLabel;
-        uiElements.shopTitle.textContent = lang.shopTitle;
-        uiElements.closeShopBtn.textContent = lang.closeShopBtn;
-        uiElements.gameOverTitle.textContent = lang.gameOverTitle;
-        uiElements.restartBtn.textContent = lang.restartBtn;
-        uiElements.menuBtn.textContent = lang.menuBtn;
-
-        uiElements.supportTitle.textContent = lang.supportTitle;
-        uiElements.helpControlsTitle.textContent = lang.helpControlsTitle;
-        uiElements.helpControlsDesc.textContent = lang.helpControlsDesc;
-        uiElements.helpGoalTitle.textContent = lang.helpGoalTitle;
-        uiElements.helpGoalDesc.textContent = lang.helpGoalDesc;
-        uiElements.helpItemsTitle.textContent = lang.helpItemsTitle;
-        uiElements.helpItemsDesc.textContent = lang.helpItemsDesc;
-        uiElements.helpContactTitle.textContent = lang.helpContactTitle;
-        uiElements.helpContactDesc.textContent = lang.helpContactDesc;
-        uiElements.closeSupportBtn.textContent = lang.closeSupportBtn;
-
-        uiElements.settingsTitle.textContent = lang.settingsTitle;
-        uiElements.volumeLabel.textContent = lang.volumeLabel;
-        uiElements.controlsLabel.textContent = lang.controlsLabel;
-        uiElements.leftLabel.textContent = lang.leftLabel;
-        uiElements.rightLabel.textContent = lang.rightLabel;
-        uiElements.closeSettingsBtn.textContent = lang.closeSettingsBtn;
-
-        mapLeftBtn.textContent = leftKey.toUpperCase();
-        mapRightBtn.textContent = rightKey.toUpperCase();
-
-        // Atualiza botões seletores
-        document.getElementById('btn-pt').classList.toggle('active', currentLang === 'pt');
-        document.getElementById('btn-en').classList.toggle('active', currentLang === 'en');
-
-        localStorage.setItem('skyJumpLang', currentLang);
-    }
 
     function updateCoinUI() {
         if (coinDisplay) coinDisplay.textContent = coins;
+    }
+
+    function showNotification(message) {
+        if (!notification) return;
+        notification.textContent = message;
+        notification.classList.remove('hidden');
+
+        setTimeout(() => {
+            notification.classList.add('hidden');
+        }, 3000);
     }
 
     class Player {
@@ -288,13 +146,8 @@ window.addEventListener('load', () => {
 
         update() {
             const currentSpeed = horizontalSpeed + this.stats.speed;
-
-            // Bloqueio Total: Apenas teclas físicas (keyboard) são aceitas
-            const goLeft = (keys[leftKey] === true) || (keys[leftKey.toUpperCase()] === true) || (keys['ArrowLeft'] === true);
-            const goRight = (keys[rightKey] === true) || (keys[rightKey.toUpperCase()] === true) || (keys['ArrowRight'] === true);
-
-            if (goLeft) this.vx = -currentSpeed;
-            else if (goRight) this.vx = currentSpeed;
+            if (keys['ArrowLeft'] || keys['a'] || keys['A']) this.vx = -currentSpeed;
+            else if (keys['ArrowRight'] || keys['d'] || keys['D']) this.vx = currentSpeed;
             else this.vx *= 0.8;
 
             this.x += this.vx;
@@ -320,24 +173,38 @@ window.addEventListener('load', () => {
             this.height = 12;
             this.x = Math.random() * (CANVAS_WIDTH - this.width);
             this.y = y;
-            this.type = (!isFirst && Math.random() < 0.15) ? 'BOOST' : 'NORMAL';
-            this.hasCoin = (!isFirst && Math.random() < 0.5); // Chance aumentada de 25% para 50% e agora em todas as plataformas
+
+            // Novos tipos: BOOST (15%) e VANISH (15%)
+            const rand = Math.random();
+            if (!isFirst && rand < 0.15) {
+                this.type = 'BOOST';
+            } else if (!isFirst && rand < 0.30) {
+                this.type = 'VANISH';
+            } else {
+                this.type = 'NORMAL';
+            }
+
+            this.hasCoin = (!isFirst && this.type === 'NORMAL' && Math.random() < 0.25);
             this.coinCollected = false;
 
-            // Movimento Horizontal (20% de chance para plataformas que não são a primeira)
-            this.isMoving = !isFirst && Math.random() < 0.2;
-            this.vx = this.isMoving ? (Math.random() < 0.5 ? 2 : -2) : 0;
+            // Timer para plataformas que somem (180 frames = ~3 segundos a 60fps)
+            this.timer = 0;
+            this.visible = true;
         }
 
         update() {
-            if (!this.isMoving) return;
-            this.x += this.vx;
-            if (this.x <= 0 || this.x + this.width >= CANVAS_WIDTH) {
-                this.vx *= -1;
+            if (this.type === 'VANISH') {
+                this.timer++;
+                if (this.timer >= 180) {
+                    this.visible = !this.visible;
+                    this.timer = 0;
+                }
             }
         }
 
         draw() {
+            if (!this.visible) return;
+
             const drawY = this.y - cameraY;
             ctx.fillStyle = 'rgba(0,0,0,0.2)';
             ctx.fillRect(this.x + 4, drawY + 4, this.width, this.height);
@@ -347,6 +214,15 @@ window.addEventListener('load', () => {
                 ctx.fillRect(this.x, drawY, this.width, this.height);
                 ctx.fillStyle = '#f44336';
                 ctx.fillRect(this.x + 5, drawY - 4, this.width - 10, 4);
+            } else if (this.type === 'VANISH') {
+                ctx.fillStyle = '#00e5ff'; // Cor ciano para identificar
+                ctx.fillRect(this.x, drawY, this.width, this.height);
+                // Efeito de pulso para avisar que vai sumir
+                if (this.timer > 120) {
+                    ctx.strokeStyle = '#fff';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(this.x, drawY, this.width, this.height);
+                }
             } else {
                 ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
                 ctx.fillRect(this.x, drawY, this.width, this.height);
@@ -366,12 +242,16 @@ window.addEventListener('load', () => {
     }
 
     class Enemy {
-        constructor(y) {
+        constructor(y, currentScore) {
             this.width = 40;
             this.height = 40;
             this.x = Math.random() * (CANVAS_WIDTH - this.width);
             this.y = y;
-            this.vx = (Math.random() - 0.5) * 4;
+
+            // Velocidade escala com a pontuação a partir de 500
+            let speedBoost = currentScore > 500 ? (currentScore - 500) / 1000 : 0;
+            let baseSpeed = 4 + speedBoost;
+            this.vx = (Math.random() - 0.5) * baseSpeed;
             this.pulse = 0;
         }
 
@@ -430,20 +310,20 @@ window.addEventListener('load', () => {
     }
 
     function spawnEnemies() {
+        // Surgem após 400 pontos para dar tempo de acostumar
         if (score < 400) return;
 
-        const spawnY = cameraY - 400;
-        const minDistance = 2000; // Distância mínima ainda maior entre bixos
+        if (enemies.length === 0 || enemies[enemies.length - 1].y > cameraY - 400) {
+            // Chance de spawn aumenta gradativamente após 500 pontos
+            let densityBoost = score > 500 ? (score - 500) / 5000 : 0;
+            const spawnChance = Math.min(0.05 + (score / 8000) + densityBoost, 0.30);
 
-        // Verifica se o último bixo está longe o suficiente
-        if (enemies.length === 0 || (enemies[enemies.length - 1].y > spawnY + minDistance)) {
-            const spawnChance = Math.min(0.002 + (score / 40000), 0.03);
             if (Math.random() < spawnChance) {
-                enemies.push(new Enemy(spawnY));
+                enemies.push(new Enemy(cameraY - 150, score));
             }
         }
 
-        if (enemies.length > 0 && enemies[0].y - cameraY > CANVAS_HEIGHT + 300) {
+        if (enemies.length > 0 && enemies[0].y - cameraY > CANVAS_HEIGHT + 100) {
             enemies.shift();
         }
     }
@@ -454,7 +334,8 @@ window.addEventListener('load', () => {
         // Colisões com plataformas (apenas caindo)
         if (player.vy > 0) {
             platforms.forEach(p => {
-                if (player.x + player.width > p.x &&
+                if (p.visible &&
+                    player.x + player.width > p.x &&
                     player.x < p.x + p.width &&
                     player.y + player.height > p.y &&
                     player.y + player.height < p.y + p.height + player.vy) {
@@ -485,7 +366,9 @@ window.addEventListener('load', () => {
 
                 if (dist < player.stats.magnet) {
                     p.coinCollected = true;
-                    coins++;
+                    // No novo mundo (neon), moedas valem 5
+                    const coinValue = (activeWorldId === 'neon') ? 5 : 1;
+                    coins += coinValue;
                     updateCoinUI();
                     localStorage.setItem('skyJumpCoins', coins);
                 }
@@ -507,6 +390,7 @@ window.addEventListener('load', () => {
     }
 
     function updateBackground() {
+        const COLORS = getActiveWorldColors();
         let factor = Math.min(score / 5000, 1);
         if (factor < 0.5) {
             const localFactor = factor * 2;
@@ -549,7 +433,6 @@ window.addEventListener('load', () => {
     }
 
     function startGame() {
-        if (animationId) cancelAnimationFrame(animationId);
         gameActive = true;
         player = new Player();
         score = 0;
@@ -580,33 +463,29 @@ window.addEventListener('load', () => {
             bgMusic.play().catch(() => { });
         }
 
-        canvas.style.cursor = 'none'; // Hide cursor when game starts
         gameLoop();
     }
 
     function endGame() {
         gameActive = false;
-        const lang = TRANSLATIONS[currentLang];
         if (animationId) cancelAnimationFrame(animationId);
         if (gameOverScreen) gameOverScreen.classList.remove('hidden');
-        if (finalScoreDisplay) finalScoreDisplay.textContent = `${lang.scorePrefix}${score}`;
+        if (finalScoreDisplay) finalScoreDisplay.textContent = `Score: ${score}`;
 
         if (score > highScore) {
             highScore = score;
             localStorage.setItem('skyJumpHighScore', highScore);
             if (highScoreValueDisplay) highScoreValueDisplay.textContent = highScore;
+            if (highScoreGameDisplay) highScoreGameDisplay.textContent = highScore;
         }
-        canvas.style.cursor = 'default'; // Show cursor when game ends
     }
 
     function renderShop() {
         if (!skinListContainer) return;
-        const lang = TRANSLATIONS[currentLang];
         skinListContainer.innerHTML = '';
         SKINS.forEach(skin => {
             const isPurchased = purchasedSkins.includes(skin.id);
             const isActive = activeSkinId === skin.id;
-            const skinTrans = lang.skins[skin.id] || { name: 'Unknown', ability: '---' };
 
             const card = document.createElement('div');
             card.className = `skin-card ${isActive ? 'selected' : ''}`;
@@ -618,15 +497,13 @@ window.addEventListener('load', () => {
                 previewHTML = `<div class="skin-preview" style="background: ${skin.color}"></div>`;
             }
 
-            const priceText = isPurchased ? (isActive ? lang.active : lang.select) : skin.price + lang.coinsSuffix;
-
             card.innerHTML = `
                 ${previewHTML}
                 <div class="skin-info">
-                    <span class="skin-name">${skinTrans.name}</span>
-                    <span class="skin-ability">${skinTrans.ability}</span>
+                    <span class="skin-name">${skin.name}</span>
+                    <span class="skin-ability">${skin.ability}</span>
                 </div>
-                <div class="skin-price">${priceText}</div>
+                <div class="skin-price">${isPurchased ? (isActive ? 'Ativo' : 'Selecionar') : skin.price + ' moedas'}</div>
             `;
 
             card.onclick = () => {
@@ -643,127 +520,107 @@ window.addEventListener('load', () => {
                     localStorage.setItem('skyJumpActiveSkin', activeSkinId);
                     updateCoinUI();
                     renderShop();
+                } else {
+                    showNotification("💰 Erro, Moedas insuficiente");
                 }
             };
             skinListContainer.appendChild(card);
         });
     }
 
+    function renderWorlds() {
+        if (!worldListContainer) return;
+        worldListContainer.innerHTML = '';
+        WORLDS.forEach(world => {
+            const isPurchased = purchasedWorlds.includes(world.id);
+            const isActive = activeWorldId === world.id;
+
+            const card = document.createElement('div');
+            card.className = `world-card ${isActive ? 'selected' : ''}`;
+
+            const previewColor = `rgb(${world.colors.SKY.r}, ${world.colors.SKY.g}, ${world.colors.SKY.b})`;
+
+            card.innerHTML = `
+                <div class="world-preview" style="background: ${previewColor}"></div>
+                <div class="skin-info">
+                    <span class="skin-name">${world.name}</span>
+                    <span class="skin-ability">Tema Visual Especial</span>
+                </div>
+                <div class="skin-price">${isPurchased ? (isActive ? 'Ativo' : 'Selecionar') : world.price + ' moedas'}</div>
+            `;
+
+            card.onclick = () => {
+                if (isPurchased) {
+                    activeWorldId = world.id;
+                    localStorage.setItem('skyJumpActiveWorld', activeWorldId);
+                    renderWorlds();
+                } else if (coins >= world.price) {
+                    coins -= world.price;
+                    purchasedWorlds.push(world.id);
+                    activeWorldId = world.id;
+                    localStorage.setItem('skyJumpCoins', coins);
+                    localStorage.setItem('skyJumpWorlds', JSON.stringify(purchasedWorlds));
+                    localStorage.setItem('skyJumpActiveWorld', activeWorldId);
+                    updateCoinUI();
+                    renderWorlds();
+                } else {
+                    showNotification("💰 Erro, Moedas insuficiente");
+                }
+            };
+            worldListContainer.appendChild(card);
+        });
+    }
+
     // Configurar Eventos
-    const setupMenuListeners = () => {
-        if (startButton) {
-            startButton.addEventListener('click', startGame);
-        }
-
-        if (restartButton) {
-            restartButton.addEventListener('click', startGame);
-        }
-
-        if (shopButton) {
-            shopButton.addEventListener('click', () => {
-                if (startScreen) startScreen.classList.add('hidden');
-                if (shopScreen) shopScreen.classList.remove('hidden');
-                renderShop();
-                console.log('Shop opened');
-            });
-        }
-
-        if (settingsButton) {
-            settingsButton.addEventListener('click', () => {
-                if (startScreen) startScreen.classList.add('hidden');
-                if (settingsScreen) settingsScreen.classList.remove('hidden');
-                console.log('Settings opened');
-            });
-        }
-
-        const supportButton = document.getElementById('support-button');
-        const supportScreen = document.getElementById('support-screen');
-        const closeSupportButton = document.getElementById('close-support');
-
-        if (supportButton) {
-            supportButton.addEventListener('click', () => {
-                if (startScreen) startScreen.classList.add('hidden');
-                if (supportScreen) supportScreen.classList.remove('hidden');
-            });
-        }
-
-        if (closeSupportButton) {
-            closeSupportButton.addEventListener('click', () => {
-                if (supportScreen) supportScreen.classList.add('hidden');
-                if (startScreen) startScreen.classList.remove('hidden');
-            });
-        }
-
-        if (closeShopButton) {
-            closeShopButton.addEventListener('click', () => {
-                if (shopScreen) shopScreen.classList.add('hidden');
-                if (startScreen) startScreen.classList.remove('hidden');
-            });
-        }
-
-        if (uiElements.menuBtn) {
-            uiElements.menuBtn.addEventListener('click', () => {
-                if (gameOverScreen) gameOverScreen.classList.add('hidden');
-                if (startScreen) startScreen.classList.remove('hidden');
-            });
-        }
-
-        // Botões de Idioma
-        const btnPt = document.getElementById('btn-pt');
-        const btnEn = document.getElementById('btn-en');
-
-        if (btnPt) {
-            btnPt.addEventListener('click', () => {
-                currentLang = 'pt';
-                updateLanguageUI();
-                if (shopScreen && !shopScreen.classList.contains('hidden')) renderShop();
-            });
-        }
-
-        if (btnEn) {
-            btnEn.addEventListener('click', () => {
-                currentLang = 'en';
-                updateLanguageUI();
-                if (shopScreen && !shopScreen.classList.contains('hidden')) renderShop();
-            });
-        }
-    };
-
-    setupMenuListeners();
-
-    // Eventos de Configurações
-    if (closeSettingsButton) {
-        closeSettingsButton.addEventListener('click', () => {
-            if (settingsScreen) settingsScreen.classList.add('hidden');
+    if (startButton) startButton.onclick = startGame;
+    if (restartButton) restartButton.onclick = startGame;
+    if (shopButton) {
+        shopButton.onclick = () => {
+            if (startScreen) startScreen.classList.add('hidden');
+            if (shopScreen) shopScreen.classList.remove('hidden');
+            renderShop();
+        };
+    }
+    if (closeShopButton) {
+        closeShopButton.onclick = () => {
+            if (shopScreen) shopScreen.classList.add('hidden');
             if (startScreen) startScreen.classList.remove('hidden');
-            isMapping = null;
-            updateLanguageUI();
-            console.log('Settings closed');
-        });
+        };
+    }
+    if (worldsButton) {
+        worldsButton.onclick = () => {
+            if (startScreen) startScreen.classList.add('hidden');
+            if (worldsScreen) worldsScreen.classList.remove('hidden');
+            renderWorlds();
+        };
+    }
+    if (closeWorldsButton) {
+        closeWorldsButton.onclick = () => {
+            if (worldsScreen) worldsScreen.classList.add('hidden');
+            if (startScreen) startScreen.classList.remove('hidden');
+        };
+    }
+    if (menuButton) {
+        menuButton.onclick = () => {
+            if (gameOverScreen) gameOverScreen.classList.add('hidden');
+            if (startScreen) startScreen.classList.remove('hidden');
+        };
     }
 
-    if (volumeControl) {
-        volumeControl.addEventListener('input', (e) => {
-            if (bgMusic) bgMusic.volume = e.target.value;
-            localStorage.setItem('skyJumpVolume', e.target.value);
-        });
-        // Inicializa volume
-        const savedVol = localStorage.getItem('skyJumpVolume') || 0.5;
-        volumeControl.value = savedVol;
-        if (bgMusic) bgMusic.volume = savedVol;
-    }
-
-    const startMapping = (side) => {
-        isMapping = side;
-        const lang = TRANSLATIONS[currentLang];
-        if (side === 'left') mapLeftBtn.textContent = lang.pressKey;
-        if (side === 'right') mapRightBtn.textContent = lang.pressKey;
-        if (side === 'left') mapLeftBtn.classList.add('waiting');
-        if (side === 'right') mapRightBtn.classList.add('waiting');
+    const handlePointerDown = (e) => {
+        if (!gameActive || !player) return;
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const rect = canvas.getBoundingClientRect();
+        const x = (clientX - rect.left) * (CANVAS_WIDTH / rect.width);
+        player.vx = (x < CANVAS_WIDTH / 2) ? -horizontalSpeed : horizontalSpeed;
     };
 
-    if (mapLeftBtn) mapLeftBtn.addEventListener('click', () => startMapping('left'));
-    if (mapRightBtn) mapRightBtn.addEventListener('click', () => startMapping('right'));
+    const handlePointerUp = () => {
+        if (player) player.vx = 0;
+    };
+
+    window.addEventListener('keydown', (e) => keys[e.key] = true);
+    window.addEventListener('keyup', (e) => keys[e.key] = false);
 
     // DESATIVAÇÃO TOTAL DO MOUSE/TOUCH PARA MOVIMENTO
     const blockEvent = (e) => {
@@ -773,83 +630,10 @@ window.addEventListener('load', () => {
         }
     };
 
-    // Bloqueia qualquer tentativa de interação com o canvas durante o jogo (exceto botões UI que estão acima)
+    // Bloqueia qualquer tentativa de interação com o canvas durante o jogo
     ['mousedown', 'mousemove', 'mouseup', 'touchstart', 'touchmove', 'touchend', 'pointerdown', 'pointermove', 'pointerup'].forEach(evt => {
         canvas.addEventListener(evt, blockEvent, { passive: false });
     });
-
-    canvas.style.cursor = 'default';
-    canvas.style.touchAction = 'none';
-
-    window.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-            if (isMapping) {
-                isMapping = null;
-                mapLeftBtn.classList.remove('waiting');
-                mapRightBtn.classList.remove('waiting');
-                updateLanguageUI();
-                return;
-            }
-
-            if (!settingsScreen.classList.contains('hidden')) {
-                settingsScreen.classList.add('hidden');
-                startScreen.classList.remove('hidden');
-            } else if (!document.getElementById('support-screen').classList.contains('hidden')) {
-                document.getElementById('support-screen').classList.add('hidden');
-                startScreen.classList.remove('hidden');
-            } else if (!shopScreen.classList.contains('hidden')) {
-                shopScreen.classList.add('hidden');
-                startScreen.classList.remove('hidden');
-            } else if (gameActive) {
-                gameActive = false;
-                if (animationId) cancelAnimationFrame(animationId);
-                settingsScreen.classList.remove('hidden');
-            } else if (!startScreen.classList.contains('hidden')) {
-                startScreen.classList.add('hidden');
-                settingsScreen.classList.remove('hidden');
-            }
-            return;
-        }
-
-        if (isMapping) {
-            const key = e.key.toLowerCase();
-            if (isMapping === 'left') {
-                leftKey = key;
-                localStorage.setItem('skyJumpKeyLeft', key);
-                mapLeftBtn.classList.remove('waiting');
-            } else {
-                rightKey = key;
-                localStorage.setItem('skyJumpKeyRight', key);
-                mapRightBtn.classList.remove('waiting');
-            }
-            isMapping = null;
-            updateLanguageUI();
-            return;
-        }
-        keys[e.key] = true;
-
-        // Inicia ou reinicia o jogo com Enter ou Espaço
-        if (e.key === 'Enter' || e.key === ' ') {
-            const isMenuVisible = !startScreen.classList.contains('hidden') || !gameOverScreen.classList.contains('hidden');
-            if (!gameActive && isMenuVisible) {
-                startGame();
-            }
-        }
-
-        // Atalhos para Loja e Configurações no Menu Inicial
-        if (!gameActive && !startScreen.classList.contains('hidden')) {
-            if (e.key.toLowerCase() === 's') {
-                startScreen.classList.add('hidden');
-                shopScreen.classList.remove('hidden');
-                renderShop();
-            } else if (e.key.toLowerCase() === 'o') {
-                startScreen.classList.add('hidden');
-                settingsScreen.classList.remove('hidden');
-            }
-        }
-    });
-
-    window.addEventListener('keyup', (e) => keys[e.key] = false);
 
     canvas.width = CANVAS_WIDTH;
     canvas.height = CANVAS_HEIGHT;
