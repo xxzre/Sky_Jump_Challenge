@@ -323,6 +323,18 @@ window.addEventListener('load', () => {
             this.type = (!isFirst && Math.random() < 0.15) ? 'BOOST' : 'NORMAL';
             this.hasCoin = (!isFirst && Math.random() < 0.5); // Chance aumentada de 25% para 50% e agora em todas as plataformas
             this.coinCollected = false;
+
+            // Movimento Horizontal (20% de chance para plataformas que não são a primeira)
+            this.isMoving = !isFirst && Math.random() < 0.2;
+            this.vx = this.isMoving ? (Math.random() < 0.5 ? 2 : -2) : 0;
+        }
+
+        update() {
+            if (!this.isMoving) return;
+            this.x += this.vx;
+            if (this.x <= 0 || this.x + this.width >= CANVAS_WIDTH) {
+                this.vx *= -1;
+            }
         }
 
         draw() {
@@ -523,7 +535,10 @@ window.addEventListener('load', () => {
         checkCollisions();
         updateBackground();
 
-        platforms.forEach(p => p.draw());
+        platforms.forEach(p => {
+            p.update();
+            p.draw();
+        });
         enemies.forEach(e => {
             e.update();
             e.draw();
