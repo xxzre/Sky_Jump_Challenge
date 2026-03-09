@@ -16,10 +16,135 @@ window.addEventListener('load', () => {
     const shopButton = document.getElementById('shop-button');
     const closeShopButton = document.getElementById('close-shop');
     const restartButton = document.getElementById('restart-button');
-    const menuButton = document.getElementById('menu-button');
+    const settingsButton = document.getElementById('settings-button');
+    const closeSettingsButton = document.getElementById('close-settings');
+    const settingsScreen = document.getElementById('settings-screen');
+    const volumeControl = document.getElementById('volume-control');
+    const mapLeftBtn = document.getElementById('map-left');
+    const mapRightBtn = document.getElementById('map-right');
     const coinDisplay = document.getElementById('coin-count');
     const skinListContainer = document.getElementById('skin-list');
     const bgMusic = document.getElementById('bg-music');
+
+    // Elementos de Tradução
+    const uiElements = {
+        title: document.getElementById('main-title'),
+        subtitle: document.getElementById('main-subtitle'),
+        startBtn: document.getElementById('start-button'),
+        shopBtn: document.getElementById('shop-button'),
+        bestLabel: document.getElementById('best-label'),
+        shopTitle: document.getElementById('shop-title'),
+        closeShopBtn: document.getElementById('close-shop'),
+        gameOverTitle: document.getElementById('game-over-title'),
+        restartBtn: document.getElementById('restart-button'),
+        menuBtn: document.getElementById('menu-button'),
+        supportTitle: document.getElementById('support-title'),
+        helpControlsTitle: document.getElementById('help-controls-title'),
+        helpControlsDesc: document.getElementById('help-controls-desc'),
+        helpGoalTitle: document.getElementById('help-goal-title'),
+        helpGoalDesc: document.getElementById('help-goal-desc'),
+        helpItemsTitle: document.getElementById('help-items-title'),
+        helpItemsDesc: document.getElementById('help-items-desc'),
+        helpContactTitle: document.getElementById('help-contact-title'),
+        helpContactDesc: document.getElementById('help-contact-desc'),
+        closeSupportBtn: document.getElementById('close-support'),
+        settingsTitle: document.getElementById('settings-title'),
+        volumeLabel: document.getElementById('label-volume'),
+        controlsLabel: document.getElementById('label-controls'),
+        leftLabel: document.getElementById('label-left'),
+        rightLabel: document.getElementById('label-right'),
+        closeSettingsBtn: document.getElementById('close-settings')
+    };
+
+    const TRANSLATIONS = {
+        pt: {
+            title: 'Escalada no Dinheiro',
+            subtitle: 'O lucro não tem limites',
+            startBtn: 'Jogar Agora',
+            shopBtn: 'Loja de Itens',
+            bestLabel: 'Melhor',
+            shopTitle: 'Mercado de Skins',
+            closeShopBtn: 'Voltar ao Menu',
+            gameOverTitle: 'Fim de Jogo',
+            restartBtn: 'Novo Vôo',
+            menuBtn: 'Menu Principal',
+            scorePrefix: 'Pontuação: ',
+            coinsSuffix: ' moedas',
+            active: 'Ativo',
+            select: 'Selecionar',
+            skins: {
+                default: { name: 'Porquinho Gay', ability: 'Padrão' },
+                neon: { name: 'Porquinho Preto', ability: '+25% Velocidade' },
+                jump: { name: 'Porquinho Do Mirassol', ability: '+15% Pulo' },
+                magnet: { name: 'Porquinho Petista', ability: 'Imã Potente' },
+                gravity: { name: 'Porquinho Do Bem', ability: '-15% Gravidade' }
+            },
+            supportTitle: 'Ajuda & Suporte',
+            helpControlsTitle: 'Controles',
+            helpControlsDesc: 'Use A/D ou as Setas do teclado para mover o personagem.',
+            helpGoalTitle: 'Objetivo',
+            helpGoalDesc: 'Suba o mais alto possível coletando moedas e evitando os bixos!',
+            helpItemsTitle: 'Itens',
+            helpItemsDesc: 'Plataformas amarelas dão super pulo. Na loja, compre skins com habilidades únicas.',
+            helpContactTitle: 'Contato & Feedback',
+            helpContactDesc: 'Gostou? Deixe seu feedback ou sugira novos bixos!',
+            closeSupportBtn: 'Voltar',
+            settingsTitle: 'Configurações',
+            volumeLabel: 'Volume',
+            controlsLabel: 'Controles',
+            leftLabel: 'Esquerda',
+            rightLabel: 'Direita',
+            closeSettingsBtn: 'Voltar',
+            pressKey: 'Pressione uma tecla...'
+        },
+        en: {
+            title: 'Money Climb',
+            subtitle: 'Profits have no limits',
+            startBtn: 'Play Now',
+            shopBtn: 'Item Shop',
+            bestLabel: 'Best',
+            shopTitle: 'Skin Market',
+            closeShopBtn: 'Back to Menu',
+            gameOverTitle: 'Game Over',
+            restartBtn: 'New Flight',
+            menuBtn: 'Main Menu',
+            scorePrefix: 'Score: ',
+            coinsSuffix: ' coins',
+            active: 'Active',
+            select: 'Select',
+            skins: {
+                default: { name: 'Gay Piggy', ability: 'Standard' },
+                neon: { name: 'Black Piggy', ability: '+25% Speed' },
+                jump: { name: 'Mirassol Piggy', ability: '+15% Jump' },
+                magnet: { name: 'Petista Piggy', ability: 'Power Magnet' },
+                gravity: { name: 'Good Piggy', ability: '-15% Gravity' }
+            },
+            supportTitle: 'Help & Support',
+            helpControlsTitle: 'Controls',
+            helpControlsDesc: 'Use A/D or Arrow keys to move the character.',
+            helpGoalTitle: 'Goal',
+            helpGoalDesc: 'Climb as high as possible collecting coins and dodging monsters!',
+            helpItemsTitle: 'Items',
+            helpItemsDesc: 'Yellow platforms give a super jump. In the shop, buy skins with unique abilities.',
+            helpContactTitle: 'Contact & Feedback',
+            helpContactDesc: 'Like it? Leave feedback or suggest new monsters!',
+            closeSupportBtn: 'Back',
+            settingsTitle: 'Settings',
+            volumeLabel: 'Volume',
+            controlsLabel: 'Controls',
+            leftLabel: 'Left',
+            rightLabel: 'Right',
+            closeSettingsBtn: 'Back',
+            pressKey: 'Press a key...'
+        }
+    };
+
+    let currentLang = localStorage.getItem('skyJumpLang') || 'pt';
+
+    // Controles Customizados
+    let leftKey = localStorage.getItem('skyJumpKeyLeft') || 'a';
+    let rightKey = localStorage.getItem('skyJumpKeyRight') || 'd';
+    let isMapping = null; // 'left' ou 'right'
 
     // Configurações e Física
     const CANVAS_WIDTH = 400;
@@ -32,11 +157,11 @@ window.addEventListener('load', () => {
 
     // Skins e Habilidades
     const SKINS = [
-        { id: 'default', name: 'Porquinho Gay', color: '#ffb6c1', imgSrc: 'assets/Porquinho_Da_Sorte_Gay.png', price: 0, ability: 'Padrão', stats: { gravity: 0, speed: 0, jump: 0, magnet: 40 } },
-        { id: 'neon', name: 'Porquinho Preto', color: '#000000ff', price: 50, ability: '+25% Velocidade', stats: { gravity: 0, speed: 1.5, jump: 0, magnet: 40 } },
-        { id: 'jump', name: 'Porquinho Petista', color: '#ff0202ff', price: 100, ability: '+15% Pulo', stats: { gravity: 0, speed: 0, jump: -3, magnet: 40 } },
-        { id: 'magnet', name: 'Porquinho Bolsonarista', color: '#eeff00ff', price: 150, ability: 'Super Buff (+15% Tudo)', stats: { gravity: -0.0575, speed: 1.725, jump: -3.45, magnet: 138 } },
-        { id: 'gravity', name: 'Porquinho Do Bem', color: '#ffffff', price: 200, ability: '-15% Gravidade', stats: { gravity: -0.05, speed: 0, jump: 0, magnet: 45 } }
+        { id: 'default', color: '#ffb6c1', imgSrc: 'assets/Porquinho_Da_Sorte_Gay.png', price: 0, stats: { gravity: 0, speed: 0, jump: 0, magnet: 40 } },
+        { id: 'neon', color: '#000000ff', imgSrc: 'assets/Porquinho_Da_Sorte_Preto.png', price: 50, stats: { gravity: 0, speed: 1.5, jump: 0, magnet: 40 } },
+        { id: 'jump', color: '#ffe600ff', imgSrc: 'assets/Porquinho_Da_Sorte_Mirassol.png', price: 100, stats: { gravity: 0, speed: 0, jump: -3, magnet: 40 } },
+        { id: 'magnet', color: '#ff0000ff', imgSrc: 'assets/Porquinho_da_Sorte_PT.png?v=1', price: 150, stats: { gravity: 0, speed: 0, jump: 0, magnet: 120 } },
+        { id: 'gravity', color: '#ffffff', imgSrc: 'assets/Porquinho_Da_Sorte_Branco.png', price: 200, stats: { gravity: -0.05, speed: 0, jump: 0, magnet: 45 } }
     ];
 
     // Estado do Jogo
@@ -71,8 +196,50 @@ window.addEventListener('load', () => {
     };
 
     // UI Inicial
+    updateLanguageUI();
     if (highScoreValueDisplay) highScoreValueDisplay.textContent = highScore;
     updateCoinUI();
+
+    function updateLanguageUI() {
+        const lang = TRANSLATIONS[currentLang];
+        uiElements.title.textContent = lang.title;
+        uiElements.subtitle.textContent = lang.subtitle;
+        uiElements.startBtn.textContent = lang.startBtn;
+        uiElements.shopBtn.textContent = lang.shopBtn;
+        uiElements.bestLabel.textContent = lang.bestLabel;
+        uiElements.shopTitle.textContent = lang.shopTitle;
+        uiElements.closeShopBtn.textContent = lang.closeShopBtn;
+        uiElements.gameOverTitle.textContent = lang.gameOverTitle;
+        uiElements.restartBtn.textContent = lang.restartBtn;
+        uiElements.menuBtn.textContent = lang.menuBtn;
+
+        uiElements.supportTitle.textContent = lang.supportTitle;
+        uiElements.helpControlsTitle.textContent = lang.helpControlsTitle;
+        uiElements.helpControlsDesc.textContent = lang.helpControlsDesc;
+        uiElements.helpGoalTitle.textContent = lang.helpGoalTitle;
+        uiElements.helpGoalDesc.textContent = lang.helpGoalDesc;
+        uiElements.helpItemsTitle.textContent = lang.helpItemsTitle;
+        uiElements.helpItemsDesc.textContent = lang.helpItemsDesc;
+        uiElements.helpContactTitle.textContent = lang.helpContactTitle;
+        uiElements.helpContactDesc.textContent = lang.helpContactDesc;
+        uiElements.closeSupportBtn.textContent = lang.closeSupportBtn;
+
+        uiElements.settingsTitle.textContent = lang.settingsTitle;
+        uiElements.volumeLabel.textContent = lang.volumeLabel;
+        uiElements.controlsLabel.textContent = lang.controlsLabel;
+        uiElements.leftLabel.textContent = lang.leftLabel;
+        uiElements.rightLabel.textContent = lang.rightLabel;
+        uiElements.closeSettingsBtn.textContent = lang.closeSettingsBtn;
+
+        mapLeftBtn.textContent = leftKey.toUpperCase();
+        mapRightBtn.textContent = rightKey.toUpperCase();
+
+        // Atualiza botões seletores
+        document.getElementById('btn-pt').classList.toggle('active', currentLang === 'pt');
+        document.getElementById('btn-en').classList.toggle('active', currentLang === 'en');
+
+        localStorage.setItem('skyJumpLang', currentLang);
+    }
 
     function updateCoinUI() {
         if (coinDisplay) coinDisplay.textContent = coins;
@@ -121,8 +288,13 @@ window.addEventListener('load', () => {
 
         update() {
             const currentSpeed = horizontalSpeed + this.stats.speed;
-            if (keys['ArrowLeft'] || keys['a'] || keys['A']) this.vx = -currentSpeed;
-            else if (keys['ArrowRight'] || keys['d'] || keys['D']) this.vx = currentSpeed;
+
+            // Bloqueio Total: Apenas teclas físicas (keyboard) são aceitas
+            const goLeft = (keys[leftKey] === true) || (keys[leftKey.toUpperCase()] === true) || (keys['ArrowLeft'] === true);
+            const goRight = (keys[rightKey] === true) || (keys[rightKey.toUpperCase()] === true) || (keys['ArrowRight'] === true);
+
+            if (goLeft) this.vx = -currentSpeed;
+            else if (goRight) this.vx = currentSpeed;
             else this.vx *= 0.8;
 
             this.x += this.vx;
@@ -149,7 +321,7 @@ window.addEventListener('load', () => {
             this.x = Math.random() * (CANVAS_WIDTH - this.width);
             this.y = y;
             this.type = (!isFirst && Math.random() < 0.15) ? 'BOOST' : 'NORMAL';
-            this.hasCoin = (!isFirst && this.type === 'NORMAL' && Math.random() < 0.25);
+            this.hasCoin = (!isFirst && Math.random() < 0.5); // Chance aumentada de 25% para 50% e agora em todas as plataformas
             this.coinCollected = false;
         }
 
@@ -209,6 +381,18 @@ window.addEventListener('load', () => {
             ctx.beginPath();
             ctx.arc(0, 0, 18, 0, Math.PI * 2);
             ctx.fill();
+
+            // Espinhos (novidade do prompt)
+            ctx.strokeStyle = '#4a148c';
+            ctx.lineWidth = 2;
+            for (let i = 0; i < 6; i++) {
+                const angle = (i / 6) * Math.PI * 2 + this.pulse * 0.5;
+                ctx.beginPath();
+                ctx.moveTo(Math.cos(angle) * 15, Math.sin(angle) * 15);
+                ctx.lineTo(Math.cos(angle) * 25, Math.sin(angle) * 25);
+                ctx.stroke();
+            }
+
             // Olho vermelho malvado
             ctx.fillStyle = 'white';
             ctx.beginPath();
@@ -234,17 +418,20 @@ window.addEventListener('load', () => {
     }
 
     function spawnEnemies() {
-        // Surgem após 400 pontos para dar tempo de acostumar
         if (score < 400) return;
 
-        if (enemies.length === 0 || enemies[enemies.length - 1].y > cameraY - 400) {
-            const spawnChance = Math.min(0.05 + (score / 8000), 0.15);
+        const spawnY = cameraY - 400;
+        const minDistance = 2000; // Distância mínima ainda maior entre bixos
+
+        // Verifica se o último bixo está longe o suficiente
+        if (enemies.length === 0 || (enemies[enemies.length - 1].y > spawnY + minDistance)) {
+            const spawnChance = Math.min(0.002 + (score / 40000), 0.03);
             if (Math.random() < spawnChance) {
-                enemies.push(new Enemy(cameraY - 150));
+                enemies.push(new Enemy(spawnY));
             }
         }
 
-        if (enemies.length > 0 && enemies[0].y - cameraY > CANVAS_HEIGHT + 100) {
+        if (enemies.length > 0 && enemies[0].y - cameraY > CANVAS_HEIGHT + 300) {
             enemies.shift();
         }
     }
@@ -347,6 +534,7 @@ window.addEventListener('load', () => {
     }
 
     function startGame() {
+        if (animationId) cancelAnimationFrame(animationId);
         gameActive = true;
         player = new Player();
         score = 0;
@@ -377,28 +565,33 @@ window.addEventListener('load', () => {
             bgMusic.play().catch(() => { });
         }
 
+        canvas.style.cursor = 'none'; // Hide cursor when game starts
         gameLoop();
     }
 
     function endGame() {
         gameActive = false;
+        const lang = TRANSLATIONS[currentLang];
         if (animationId) cancelAnimationFrame(animationId);
         if (gameOverScreen) gameOverScreen.classList.remove('hidden');
-        if (finalScoreDisplay) finalScoreDisplay.textContent = `Score: ${score}`;
+        if (finalScoreDisplay) finalScoreDisplay.textContent = `${lang.scorePrefix}${score}`;
 
         if (score > highScore) {
             highScore = score;
             localStorage.setItem('skyJumpHighScore', highScore);
             if (highScoreValueDisplay) highScoreValueDisplay.textContent = highScore;
         }
+        canvas.style.cursor = 'default'; // Show cursor when game ends
     }
 
     function renderShop() {
         if (!skinListContainer) return;
+        const lang = TRANSLATIONS[currentLang];
         skinListContainer.innerHTML = '';
         SKINS.forEach(skin => {
             const isPurchased = purchasedSkins.includes(skin.id);
             const isActive = activeSkinId === skin.id;
+            const skinTrans = lang.skins[skin.id] || { name: 'Unknown', ability: '---' };
 
             const card = document.createElement('div');
             card.className = `skin-card ${isActive ? 'selected' : ''}`;
@@ -410,13 +603,15 @@ window.addEventListener('load', () => {
                 previewHTML = `<div class="skin-preview" style="background: ${skin.color}"></div>`;
             }
 
+            const priceText = isPurchased ? (isActive ? lang.active : lang.select) : skin.price + lang.coinsSuffix;
+
             card.innerHTML = `
                 ${previewHTML}
                 <div class="skin-info">
-                    <span class="skin-name">${skin.name}</span>
-                    <span class="skin-ability">${skin.ability}</span>
+                    <span class="skin-name">${skinTrans.name}</span>
+                    <span class="skin-ability">${skinTrans.ability}</span>
                 </div>
-                <div class="skin-price">${isPurchased ? (isActive ? 'Ativo' : 'Selecionar') : skin.price + ' moedas'}</div>
+                <div class="skin-price">${priceText}</div>
             `;
 
             card.onclick = () => {
@@ -440,54 +635,206 @@ window.addEventListener('load', () => {
     }
 
     // Configurar Eventos
-    if (startButton) startButton.onclick = startGame;
-    if (restartButton) restartButton.onclick = startGame;
-    if (shopButton) {
-        shopButton.onclick = () => {
-            if (startScreen) startScreen.classList.add('hidden');
-            if (shopScreen) shopScreen.classList.remove('hidden');
-            renderShop();
-        };
-    }
-    if (closeShopButton) {
-        closeShopButton.onclick = () => {
-            if (shopScreen) shopScreen.classList.add('hidden');
-            if (startScreen) startScreen.classList.remove('hidden');
-        };
-    }
-    if (menuButton) {
-        menuButton.onclick = () => {
-            if (gameOverScreen) gameOverScreen.classList.add('hidden');
-            if (startScreen) startScreen.classList.remove('hidden');
-        };
-    }
+    const setupMenuListeners = () => {
+        if (startButton) {
+            startButton.addEventListener('click', startGame);
+        }
 
-    const handlePointerDown = (e) => {
-        if (!gameActive || !player) return;
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        const rect = canvas.getBoundingClientRect();
-        const x = (clientX - rect.left) * (CANVAS_WIDTH / rect.width);
-        player.vx = (x < CANVAS_WIDTH / 2) ? -horizontalSpeed : horizontalSpeed;
+        if (restartButton) {
+            restartButton.addEventListener('click', startGame);
+        }
+
+        if (shopButton) {
+            shopButton.addEventListener('click', () => {
+                if (startScreen) startScreen.classList.add('hidden');
+                if (shopScreen) shopScreen.classList.remove('hidden');
+                renderShop();
+                console.log('Shop opened');
+            });
+        }
+
+        if (settingsButton) {
+            settingsButton.addEventListener('click', () => {
+                if (startScreen) startScreen.classList.add('hidden');
+                if (settingsScreen) settingsScreen.classList.remove('hidden');
+                console.log('Settings opened');
+            });
+        }
+
+        const supportButton = document.getElementById('support-button');
+        const supportScreen = document.getElementById('support-screen');
+        const closeSupportButton = document.getElementById('close-support');
+
+        if (supportButton) {
+            supportButton.addEventListener('click', () => {
+                if (startScreen) startScreen.classList.add('hidden');
+                if (supportScreen) supportScreen.classList.remove('hidden');
+            });
+        }
+
+        if (closeSupportButton) {
+            closeSupportButton.addEventListener('click', () => {
+                if (supportScreen) supportScreen.classList.add('hidden');
+                if (startScreen) startScreen.classList.remove('hidden');
+            });
+        }
+
+        if (closeShopButton) {
+            closeShopButton.addEventListener('click', () => {
+                if (shopScreen) shopScreen.classList.add('hidden');
+                if (startScreen) startScreen.classList.remove('hidden');
+            });
+        }
+
+        if (uiElements.menuBtn) {
+            uiElements.menuBtn.addEventListener('click', () => {
+                if (gameOverScreen) gameOverScreen.classList.add('hidden');
+                if (startScreen) startScreen.classList.remove('hidden');
+            });
+        }
+
+        // Botões de Idioma
+        const btnPt = document.getElementById('btn-pt');
+        const btnEn = document.getElementById('btn-en');
+
+        if (btnPt) {
+            btnPt.addEventListener('click', () => {
+                currentLang = 'pt';
+                updateLanguageUI();
+                if (shopScreen && !shopScreen.classList.contains('hidden')) renderShop();
+            });
+        }
+
+        if (btnEn) {
+            btnEn.addEventListener('click', () => {
+                currentLang = 'en';
+                updateLanguageUI();
+                if (shopScreen && !shopScreen.classList.contains('hidden')) renderShop();
+            });
+        }
     };
 
-    const handlePointerUp = () => {
-        if (player) player.vx = 0;
+    setupMenuListeners();
+
+    // Eventos de Configurações
+    if (closeSettingsButton) {
+        closeSettingsButton.addEventListener('click', () => {
+            if (settingsScreen) settingsScreen.classList.add('hidden');
+            if (startScreen) startScreen.classList.remove('hidden');
+            isMapping = null;
+            updateLanguageUI();
+            console.log('Settings closed');
+        });
+    }
+
+    if (volumeControl) {
+        volumeControl.addEventListener('input', (e) => {
+            if (bgMusic) bgMusic.volume = e.target.value;
+            localStorage.setItem('skyJumpVolume', e.target.value);
+        });
+        // Inicializa volume
+        const savedVol = localStorage.getItem('skyJumpVolume') || 0.5;
+        volumeControl.value = savedVol;
+        if (bgMusic) bgMusic.volume = savedVol;
+    }
+
+    const startMapping = (side) => {
+        isMapping = side;
+        const lang = TRANSLATIONS[currentLang];
+        if (side === 'left') mapLeftBtn.textContent = lang.pressKey;
+        if (side === 'right') mapRightBtn.textContent = lang.pressKey;
+        if (side === 'left') mapLeftBtn.classList.add('waiting');
+        if (side === 'right') mapRightBtn.classList.add('waiting');
     };
 
-    window.addEventListener('keydown', (e) => keys[e.key] = true);
+    if (mapLeftBtn) mapLeftBtn.addEventListener('click', () => startMapping('left'));
+    if (mapRightBtn) mapRightBtn.addEventListener('click', () => startMapping('right'));
+
+    // DESATIVAÇÃO TOTAL DO MOUSE/TOUCH PARA MOVIMENTO
+    const blockEvent = (e) => {
+        if (gameActive) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+    };
+
+    // Bloqueia qualquer tentativa de interação com o canvas durante o jogo (exceto botões UI que estão acima)
+    ['mousedown', 'mousemove', 'mouseup', 'touchstart', 'touchmove', 'touchend', 'pointerdown', 'pointermove', 'pointerup'].forEach(evt => {
+        canvas.addEventListener(evt, blockEvent, { passive: false });
+    });
+
+    canvas.style.cursor = 'default';
+    canvas.style.touchAction = 'none';
+
+    window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            if (isMapping) {
+                isMapping = null;
+                mapLeftBtn.classList.remove('waiting');
+                mapRightBtn.classList.remove('waiting');
+                updateLanguageUI();
+                return;
+            }
+
+            if (!settingsScreen.classList.contains('hidden')) {
+                settingsScreen.classList.add('hidden');
+                startScreen.classList.remove('hidden');
+            } else if (!document.getElementById('support-screen').classList.contains('hidden')) {
+                document.getElementById('support-screen').classList.add('hidden');
+                startScreen.classList.remove('hidden');
+            } else if (!shopScreen.classList.contains('hidden')) {
+                shopScreen.classList.add('hidden');
+                startScreen.classList.remove('hidden');
+            } else if (gameActive) {
+                gameActive = false;
+                if (animationId) cancelAnimationFrame(animationId);
+                settingsScreen.classList.remove('hidden');
+            } else if (!startScreen.classList.contains('hidden')) {
+                startScreen.classList.add('hidden');
+                settingsScreen.classList.remove('hidden');
+            }
+            return;
+        }
+
+        if (isMapping) {
+            const key = e.key.toLowerCase();
+            if (isMapping === 'left') {
+                leftKey = key;
+                localStorage.setItem('skyJumpKeyLeft', key);
+                mapLeftBtn.classList.remove('waiting');
+            } else {
+                rightKey = key;
+                localStorage.setItem('skyJumpKeyRight', key);
+                mapRightBtn.classList.remove('waiting');
+            }
+            isMapping = null;
+            updateLanguageUI();
+            return;
+        }
+        keys[e.key] = true;
+
+        // Inicia ou reinicia o jogo com Enter ou Espaço
+        if (e.key === 'Enter' || e.key === ' ') {
+            const isMenuVisible = !startScreen.classList.contains('hidden') || !gameOverScreen.classList.contains('hidden');
+            if (!gameActive && isMenuVisible) {
+                startGame();
+            }
+        }
+
+        // Atalhos para Loja e Configurações no Menu Inicial
+        if (!gameActive && !startScreen.classList.contains('hidden')) {
+            if (e.key.toLowerCase() === 's') {
+                startScreen.classList.add('hidden');
+                shopScreen.classList.remove('hidden');
+                renderShop();
+            } else if (e.key.toLowerCase() === 'o') {
+                startScreen.classList.add('hidden');
+                settingsScreen.classList.remove('hidden');
+            }
+        }
+    });
+
     window.addEventListener('keyup', (e) => keys[e.key] = false);
-
-    canvas.addEventListener('mousedown', handlePointerDown);
-    canvas.addEventListener('mouseup', handlePointerUp);
-    window.addEventListener('mouseup', handlePointerUp);
-    canvas.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        handlePointerDown(e);
-    }, { passive: false });
-    canvas.addEventListener('touchend', (e) => {
-        e.preventDefault();
-        handlePointerUp();
-    }, { passive: false });
 
     canvas.width = CANVAS_WIDTH;
     canvas.height = CANVAS_HEIGHT;
