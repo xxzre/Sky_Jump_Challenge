@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Config Check</title>
+</head>
+
+<body>
+    <script src="game.js"></script>
+    <script>
+        console.log("Skins:", SKINS);
+        console.log("Translations:", TRANSLATIONS);
+        document.body.innerHTML = `
+            <h1>Versão Atual do Código</h1>
+            <pre>${JSON.stringify({ SKINS, TRANSLATIONS }, null, 2)}</pre>
+        `;
+    </script>
+</body>
+
+</html>

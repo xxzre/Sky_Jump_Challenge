@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Escalada no Dinheiro - V2</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .lang-selector {
+            margin: 10px 0;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .lang-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid white;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .lang-btn.active {
+            background: #00e5ff;
+            color: black;
+            border-color: #00e5ff;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="game-container">
+        <div class="stats-container">
+            <div class="stat-box">
+                <span>Score:</span>
+                <span id="score-value">0</span>
+            </div>
+            <div class="stat-box">
+                <div class="coin-icon">Moedas: </div>
+                <span id="coin-count">0</span>
+            </div>
+        </div>
+
+        <canvas id="gameCanvas"></canvas>
+
+        <!-- Start Screen -->
+        <div id="start-screen" class="ui-layer">
+            <h1 id="main-title" class="floating">Escalada no Dinheiro</h1>
+            <p id="main-subtitle">O lucro não tem limites</p>
+
+            <div class="lang-selector">
+                <button id="btn-pt" class="lang-btn active">🇧🇷 PT</button>
+                <button id="btn-en" class="lang-btn">🇺🇸 EN</button>
+            </div>
+
+            <div class="menu-buttons">
+                <button id="start-button" class="btn">Play Now</button>
+                <button id="shop-button" class="btn secondary">Item Shop</button>
+                <button id="settings-button" class="btn secondary" style="display:none">⚙️</button>
+            </div>
+            <div class="high-score-label"><span id="best-label">Best</span>: <span id="high-score-value">0</span></div>
+        </div>
+
+        <!-- Shop Screen -->
+        <div id="shop-screen" class="ui-layer hidden">
+            <h1 id="shop-title">Mercado de Skins</h1>
+            <div id="skin-list" class="skin-container">
+                <!-- Skins will be injected here via JS -->
+            </div>
+            <button id="close-shop" class="btn secondary">Back to Menu</button>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div id="game-over-screen" class="ui-layer hidden">
+            <h1 id="game-over-title">Game Over</h1>
+            <p id="final-score">Score: 0</p>
+            <div class="menu-buttons">
+                <button id="restart-button" class="btn">New Flight</button>
+                <button id="menu-button" class="btn secondary" style="display:none">Main Menu</button>
+            </div>
+        </div>
+
+        <!-- Placeholder for missing UI elements in v2 simplified script -->
+        <div style="display:none">
+            <button id="close-settings"></button>
+            <div id="settings-screen"></div>
+            <input type="range" id="volume-control">
+            <button id="map-left"></button>
+            <button id="map-right"></button>
+            <audio id="bg-music"></audio>
+            <div id="support-title"></div>
+            <div id="help-controls-title"></div>
+            <div id="help-controls-desc"></div>
+            <div id="help-goal-title"></div>
+            <div id="help-goal-desc"></div>
+            <div id="help-items-title"></div>
+            <div id="help-items-desc"></div>
+            <div id="help-contact-title"></div>
+            <div id="help-contact-desc"></div>
+            <button id="close-support"></button>
+            <div id="settings-title"></div>
+            <div id="label-volume"></div>
+            <div id="label-controls"></div>
+            <div id="label-left"></div>
+            <div id="label-right"></div>
+        </div>
+    </div>
+
+    <script src="game_v2.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TESTE: Escalada no Dinheiro</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            background: #1a1a2e;
+            color: white;
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .test-box {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        button {
+            background: #4e4e91;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="test-box">
+        <h1>Página de Teste de Skins</h1>
+        <p>Esta página foi criada para verificar se as novas skins estão sendo carregadas corretamente.</p>
+        <div id="skin-debug">Carregando skins...</div>
+        <button onclick="location.reload()">Recarregar Página</button>
+        <br><br>
+        <a href="index.html" style="color: #00e5ff;">Voltar para o Jogo Principal</a>
+    </div>
+
+    <!-- Interface mínima necessária para o script não quebrar -->
+    <div style="display:none">
+        <canvas id="gameCanvas"></canvas>
+        <div id="score-value">0</div>
+        <div id="high-score-value">0</div>
+        <div id="final-score">0</div>
+        <div id="start-screen"></div>
+        <div id="shop-screen"></div>
+        <div id="game-over-screen"></div>
+        <button id="start-button"></button>
+        <button id="shop-button"></button>
+        <button id="close-shop"></button>
+        <button id="restart-button"></button>
+        <button id="menu-button"></button>
+        <button id="settings-button"></button>
+        <button id="close-settings"></button>
+        <div id="settings-screen"></div>
+        <input type="range" id="volume-control">
+        <button id="map-left"></button>
+        <button id="map-right"></button>
+        <div id="coin-count">0</div>
+        <div id="skin-list"></div>
+        <audio id="bg-music"></audio>
+        <div id="main-title"></div>
+        <div id="main-subtitle"></div>
+        <div id="best-label"></div>
+        <div id="shop-title"></div>
+        <div id="game-over-title"></div>
+        <div id="support-title"></div>
+        <div id="help-controls-title"></div>
+        <div id="help-controls-desc"></div>
+        <div id="help-goal-title"></div>
+        <div id="help-goal-desc"></div>
+        <div id="help-items-title"></div>
+        <div id="help-items-desc"></div>
+        <div id="help-contact-title"></div>
+        <div id="help-contact-desc"></div>
+        <button id="close-support"></button>
+        <div id="settings-title"></div>
+        <div id="label-volume"></div>
+        <div id="label-controls"></div>
+        <div id="label-left"></div>
+        <div id="label-right"></div>
+        <button id="btn-pt"></button>
+        <button id="btn-en"></button>
+    </div>
+
+    <script src="game.js"></script>
+    <script>
+        window.addEventListener('load', () => {
+            const debug = document.getElementById('skin-debug');
+            const lang = TRANSLATIONS[currentLang] || TRANSLATIONS.pt;
+            let html = '<h3>Skins no Código:</h3><ul>';
+            SKINS.forEach(s => {
+                const name = lang.skins[s.id].name;
+                html += `<li>ID: <b>${s.id}</b> | Nome: <b>${name}</b> | Imagem: <code>${s.imgSrc}</code></li>`;
+            });
+            html += '</ul>';
+            debug.innerHTML = html;
+        });
+    </script>
+</body>
+
+</html>
