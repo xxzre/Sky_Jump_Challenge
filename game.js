@@ -11,6 +11,13 @@ window.addEventListener('load', () => {
     const highScoreGameDisplay = document.getElementById('high-score-game');
     const finalScoreDisplay = document.getElementById('final-score');
     const startScreen = document.getElementById('start-screen');
+
+    // Global Error Handler for Mobile/Debug
+    window.onerror = function (msg, url, line) {
+        showNotification(`Error: ${msg} at ${line}`);
+        console.error(msg, url, line);
+        return false;
+    };
     const shopScreen = document.getElementById('shop-screen');
     const gameOverScreen = document.getElementById('game-over-screen');
     const startButton = document.getElementById('start-btn');
@@ -146,9 +153,10 @@ window.addEventListener('load', () => {
     ];
 
     const WORLDS = [
-        { id: 'classic', name: 'Mundo Clássico', price: 0, colors: { SKY: { r: 135, g: 206, b: 235 }, DEEP: { r: 26, g: 35, b: 126 }, SPACE: { r: 0, g: 0, b: 51 } } },
-        { id: 'neon', name: 'Cidade Neon', price: 500, colors: { SKY: { r: 40, g: 0, b: 80 }, DEEP: { r: 0, g: 0, b: 30 }, SPACE: { r: 0, g: 0, b: 0 } } },
-        { id: 'gold', name: 'Cofre de Ouro', price: 1000, colors: { SKY: { r: 218, g: 165, b: 32 }, DEEP: { r: 0, g: 100, b: 0 }, SPACE: { r: 0, g: 0, b: 0 } } }
+        { id: 'classic', name: 'Mundo Clássico', price: 0, currency: 'coins', colors: { SKY: { r: 135, g: 206, b: 235 }, DEEP: { r: 26, g: 35, b: 126 }, SPACE: { r: 0, g: 0, b: 51 } } },
+        { id: 'neon', name: 'Cidade Neon', price: 500, currency: 'coins', colors: { SKY: { r: 40, g: 0, b: 80 }, DEEP: { r: 0, g: 0, b: 30 }, SPACE: { r: 0, g: 0, b: 0 } } },
+        { id: 'gold', name: 'Cofre de Ouro', price: 1000, currency: 'coins', colors: { SKY: { r: 218, g: 165, b: 32 }, DEEP: { r: 0, g: 100, b: 0 }, SPACE: { r: 0, g: 0, b: 0 } } },
+        { id: 'diamond', name: 'Mundo de Diamante', price: 500, currency: 'gems', colors: { SKY: { r: 0, g: 229, b: 255 }, DEEP: { r: 0, g: 105, b: 92 }, SPACE: { r: 0, g: 0, b: 0 } } }
     ];
 
     // Estado do Jogo
@@ -186,6 +194,182 @@ window.addEventListener('load', () => {
     // Mundos
     let purchasedWorlds = JSON.parse(localStorage.getItem('skyJumpWorlds')) || ['classic'];
     let activeWorldId = localStorage.getItem('skyJumpActiveWorld') || 'classic';
+
+    // CLASSES (Defined early to avoid hoisting issues)
+    class Player {
+        constructor() {
+            this.width = 45;
+            this.height = 45;
+            this.x = CANVAS_WIDTH / 2 - this.width / 2;
+            this.y = CANVAS_HEIGHT - 100;
+            this.vx = 0;
+            this.vy = 0;
+
+            const skin = SKINS.find(s => s.id === activeSkinId) || SKINS[0];
+            this.color = skin.color;
+            this.stats = skin.stats;
+            if (skin.imgSrc) {
+                this.image = new Image();
+                this.image.src = skin.imgSrc;
+            } else {
+                this.image = null;
+            }
+        }
+
+        draw() {
+            const drawY = this.y - cameraY;
+            if (this.image && this.image.complete && this.image.naturalWidth > 0) {
+                ctx.drawImage(this.image, this.x, drawY, this.width, this.height);
+                return;
+            }
+            ctx.fillStyle = this.color;
+            ctx.beginPath();
+            ctx.ellipse(this.x + this.width / 2, drawY + this.height / 2, this.width / 2, this.height / 2, 0, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        update() {
+            const currentSpeed = (horizontalSpeed + (this.stats?.speed || 0)) * speedMultiplier;
+            const goLeft = keys[leftKey] || keys[leftKey.toUpperCase()] || keys['ArrowLeft'];
+            const goRight = keys[rightKey] || keys[rightKey.toUpperCase()] || keys['ArrowRight'];
+
+            if (goLeft) this.vx = -currentSpeed;
+            else if (goRight) this.vx = currentSpeed;
+            else this.vx *= 0.8;
+
+            this.x += this.vx;
+            if (this.x + this.width < 0) this.x = CANVAS_WIDTH;
+            if (this.x > CANVAS_WIDTH) this.x = -this.width;
+
+            this.vy += (gravity + (this.stats?.gravity || 0));
+            this.y += this.vy;
+
+            if (this.y < cameraY + 250) {
+                cameraY = this.y - 250;
+            }
+        }
+
+        jump(multiplier = 1) {
+            this.vy = (JUMP_FORCE + (this.stats?.jump || 0)) * multiplier * boostMultiplier;
+        }
+    }
+
+    class Platform {
+        constructor(y, isFirst = false) {
+            this.width = 70;
+            this.height = 12;
+            this.x = Math.random() * (CANVAS_WIDTH - this.width);
+            this.y = y;
+            this.type = 'NORMAL';
+            const rand = Math.random();
+            if (!isFirst) {
+                if (rand < 0.15) this.type = 'BOOST';
+                else if (rand < 0.30) this.type = 'VANISH';
+            }
+            this.hasCoin = (!isFirst && Math.random() < 0.50);
+            this.hasKey = (!isFirst && !this.hasCoin && Math.random() < 0.15);
+            this.coinCollected = false;
+            this.keyCollected = false;
+            this.itemX = this.x + this.width / 2;
+            this.itemY = y - 15;
+            this.timer = 0;
+            this.visible = true;
+        }
+
+        update() {
+            if (this.type === 'VANISH') {
+                this.timer++;
+                if (this.timer >= 180) {
+                    this.visible = !this.visible;
+                    this.timer = 0;
+                }
+            }
+            const hasActiveItem = (this.hasCoin && !this.coinCollected) || (this.hasKey && !this.keyCollected);
+            if (hasActiveItem && player && gameActive) {
+                const dist = Math.sqrt(Math.pow((player.x + player.width / 2) - this.itemX, 2) + Math.pow((player.y + player.height / 2) - this.itemY, 2));
+                if (dist < (player.stats?.magnet || 40)) {
+                    const angle = Math.atan2((player.y + player.height / 2) - this.itemY, (player.x + player.width / 2) - this.itemX);
+                    this.itemX += Math.cos(angle) * 12;
+                    this.itemY += Math.sin(angle) * 12;
+                    if (dist < 30) {
+                        if (this.hasCoin && !this.coinCollected) {
+                            this.coinCollected = true;
+                            let val = 1;
+                            if (activeWorldId === 'neon') val = 5;
+                            if (activeWorldId === 'gold') val = 20;
+                            if (activeSkinId === 'jump') val *= 2;
+                            coins += val * coinMultiplier;
+                            updateCoinUI();
+                        } else if (this.hasKey && !this.keyCollected) {
+                            this.keyCollected = true;
+                            keysCount++;
+                            updateKeyUI();
+                            if (keysCount >= 3) triggerRewardChest();
+                        }
+                        localStorage.setItem('skyJumpCoins', coins);
+                    }
+                }
+            }
+        }
+
+        draw() {
+            if (!this.visible) return;
+            const drawY = this.y - cameraY;
+            ctx.fillStyle = 'rgba(0,0,0,0.2)';
+            ctx.fillRect(this.x + 4, drawY + 4, this.width, this.height);
+            if (this.type === 'BOOST') {
+                ctx.fillStyle = '#ffeb3b';
+                ctx.fillRect(this.x, drawY, this.width, this.height);
+                ctx.fillStyle = '#f44336';
+                ctx.fillRect(this.x + 5, drawY - 4, this.width - 10, 4);
+            } else if (this.type === 'VANISH') {
+                ctx.fillStyle = '#00e5ff';
+                ctx.fillRect(this.x, drawY, this.width, this.height);
+            } else {
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+                ctx.fillRect(this.x, drawY, this.width, this.height);
+            }
+            if (this.hasCoin && !this.coinCollected) {
+                ctx.fillStyle = '#ffd700';
+                ctx.beginPath();
+                ctx.arc(this.itemX, this.itemY - cameraY, 8, 0, Math.PI * 2);
+                ctx.fill();
+            } else if (this.hasKey && !this.keyCollected) {
+                ctx.font = '20px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('🔑', this.itemX, this.itemY - cameraY + 7);
+            }
+        }
+    }
+
+    class Enemy {
+        constructor(y, currentScore) {
+            this.width = 40;
+            this.height = 40;
+            this.x = Math.random() * (CANVAS_WIDTH - this.width);
+            this.y = y;
+            let speedBoost = currentScore > 500 ? (currentScore - 500) / 1000 : 0;
+            this.vx = (Math.random() - 0.5) * (4 + speedBoost);
+            this.pulse = 0;
+        }
+        update() {
+            this.x += this.vx;
+            if (this.x <= 0 || this.x + this.width >= CANVAS_WIDTH) this.vx *= -1;
+            this.pulse += 0.1;
+        }
+        draw() {
+            const drawY = this.y - cameraY;
+            const s = 1 + Math.sin(this.pulse) * 0.05;
+            ctx.save();
+            ctx.translate(this.x + this.width / 2, drawY + this.height / 2);
+            ctx.scale(s, s);
+            ctx.fillStyle = '#ff80ab';
+            ctx.beginPath();
+            ctx.arc(0, 0, 18, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+    }
 
     // Transições de Cores
     function getActiveWorldColors() {
@@ -353,290 +537,7 @@ window.addEventListener('load', () => {
         }, 3000);
     }
 
-    class Player {
-        constructor() {
-            this.width = 45;
-            this.height = 45;
-            this.x = CANVAS_WIDTH / 2 - this.width / 2;
-            this.y = CANVAS_HEIGHT - 100;
-            this.vx = 0;
-            this.vy = 0;
 
-            const skin = SKINS.find(s => s.id === activeSkinId) || SKINS[0];
-            this.color = skin.color;
-            this.stats = skin.stats;
-            if (skin.imgSrc) {
-                this.image = new Image();
-                this.image.src = skin.imgSrc;
-            } else {
-                this.image = null;
-            }
-        }
-
-        draw() {
-            const drawY = this.y - cameraY;
-
-            if (this.image && this.image.complete && this.image.naturalWidth > 0) {
-                ctx.drawImage(this.image, this.x, drawY, this.width, this.height);
-                return;
-            }
-
-            ctx.fillStyle = this.color;
-            ctx.beginPath();
-            ctx.ellipse(this.x + this.width / 2, drawY + this.height / 2, this.width / 2, this.height / 2, 0, 0, Math.PI * 2);
-            ctx.fill();
-
-            // Olhos como fallback
-            ctx.fillStyle = 'white';
-            ctx.beginPath();
-            ctx.arc(this.x + this.width / 2 - 8, drawY + 15, 5, 0, Math.PI * 2);
-            ctx.arc(this.x + this.width / 2 + 8, drawY + 15, 5, 0, Math.PI * 2);
-            ctx.fill();
-        }
-
-        update() {
-            const currentSpeed = (horizontalSpeed + this.stats.speed) * speedMultiplier;
-            const goLeft = (keys[leftKey] === true) || (keys[leftKey.toUpperCase()] === true) || (keys['ArrowLeft'] === true);
-            const goRight = (keys[rightKey] === true) || (keys[rightKey.toUpperCase()] === true) || (keys['ArrowRight'] === true);
-
-            if (goLeft) this.vx = -currentSpeed;
-            else if (goRight) this.vx = currentSpeed;
-            else this.vx *= 0.8;
-
-            this.x += this.vx;
-            if (this.x + this.width < 0) this.x = CANVAS_WIDTH;
-            if (this.x > CANVAS_WIDTH) this.x = -this.width;
-
-            this.vy += (gravity + this.stats.gravity);
-            this.y += this.vy;
-
-            if (this.y < cameraY + 250) {
-                cameraY = this.y - 250;
-            }
-        }
-
-        jump(multiplier = 1) {
-            this.vy = (JUMP_FORCE + this.stats.jump) * multiplier * boostMultiplier;
-        }
-    }
-
-    class Platform {
-        constructor(y, isFirst = false) {
-            this.width = 70;
-            this.height = 12;
-            this.x = Math.random() * (CANVAS_WIDTH - this.width);
-            this.y = y;
-
-            // Novos tipos: BOOST (15%) e VANISH (15%)
-            const rand = Math.random();
-            if (!isFirst && rand < 0.15) {
-                this.type = 'BOOST';
-            } else if (!isFirst && rand < 0.30) {
-                this.type = 'VANISH';
-            } else {
-                this.type = 'NORMAL';
-            }
-
-            this.hasCoin = (!isFirst && Math.random() < 0.50);
-            this.hasKey = (!isFirst && !this.hasCoin && Math.random() < 0.15); // 15% de chance de chave se não tiver moeda
-            this.coinCollected = false;
-            this.keyCollected = false;
-
-            // Posição individual da moeda/chave para efeito de imã
-            this.itemX = this.x + this.width / 2;
-            this.itemY = y - 15;
-
-            // Timer para plataformas que somem (180 frames = ~3 segundos a 60fps)
-            this.timer = 0;
-            this.visible = true;
-        }
-
-        update() {
-            if (this.type === 'VANISH') {
-                this.timer++;
-                if (this.timer >= 180) {
-                    this.visible = !this.visible;
-                    this.timer = 0;
-                }
-            }
-
-            // Efeito de Imã: Se tiver item e não foi coletado, puxar para o player
-            const hasActiveItem = (this.hasCoin && !this.coinCollected) || (this.hasKey && !this.keyCollected);
-            if (hasActiveItem && player && gameActive) {
-                const dist = Math.sqrt(
-                    Math.pow((player.x + player.width / 2) - this.itemX, 2) +
-                    Math.pow((player.y + player.height / 2) - this.itemY, 2)
-                );
-
-                if (dist < player.stats.magnet) {
-                    const angle = Math.atan2((player.y + player.height / 2) - this.itemY, (player.x + player.width / 2) - this.itemX);
-                    const speed = 12;
-                    this.itemX += Math.cos(angle) * speed;
-                    this.itemY += Math.sin(angle) * speed;
-
-                    if (dist < 30) {
-                        if (this.hasCoin && !this.coinCollected) {
-                            this.coinCollected = true;
-                            let coinValue = 1;
-                            if (activeWorldId === 'neon') coinValue = 5;
-                            if (activeWorldId === 'gold') coinValue = 20;
-                            if (activeSkinId === 'jump') coinValue *= 2;
-
-                            // Aplicar Multiplicador de Recompensa
-                            coinValue *= coinMultiplier;
-
-                            coins += coinValue;
-                            updateCoinUI();
-                        } else if (this.hasKey && !this.keyCollected) {
-                            this.keyCollected = true;
-                            keysCount++;
-                            updateKeyUI();
-                            if (keysCount >= 3) {
-                                triggerRewardChest();
-                            }
-                        }
-                        localStorage.setItem('skyJumpCoins', coins);
-                    }
-                }
-            }
-        }
-
-        draw() {
-            if (!this.visible) return;
-
-            const drawY = this.y - cameraY;
-            ctx.fillStyle = 'rgba(0,0,0,0.2)';
-            ctx.fillRect(this.x + 4, drawY + 4, this.width, this.height);
-
-            if (this.type === 'BOOST') {
-                ctx.fillStyle = '#ffeb3b';
-                ctx.fillRect(this.x, drawY, this.width, this.height);
-                ctx.fillStyle = '#f44336';
-                ctx.fillRect(this.x + 5, drawY - 4, this.width - 10, 4);
-            } else if (this.type === 'VANISH') {
-                ctx.fillStyle = '#00e5ff'; // Cor ciano para identificar
-                ctx.fillRect(this.x, drawY, this.width, this.height);
-                // Efeito de pulso para avisar que vai sumir
-                if (this.timer > 120) {
-                    ctx.strokeStyle = '#fff';
-                    ctx.lineWidth = 2;
-                    ctx.strokeRect(this.x, drawY, this.width, this.height);
-                }
-            } else {
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-                ctx.fillRect(this.x, drawY, this.width, this.height);
-            }
-
-            if (this.hasCoin && !this.coinCollected) {
-                const coinDrawY = this.itemY - cameraY;
-                ctx.fillStyle = '#ffd700';
-                ctx.beginPath();
-                ctx.arc(this.itemX, coinDrawY, 8, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.strokeStyle = '#b8860b';
-                ctx.lineWidth = 1;
-                ctx.stroke();
-            } else if (this.hasKey && !this.keyCollected) {
-                const keyDrawY = this.itemY - cameraY;
-                ctx.font = '20px Arial';
-                ctx.textAlign = 'center';
-                ctx.fillText('🔑', this.itemX, keyDrawY + 7);
-            }
-        }
-    }
-
-    class Enemy {
-        constructor(y, currentScore) {
-            this.width = 40;
-            this.height = 40;
-            this.x = Math.random() * (CANVAS_WIDTH - this.width);
-            this.y = y;
-
-            // Velocidade escala com a pontuação a partir de 500
-            let speedBoost = currentScore > 500 ? (currentScore - 500) / 1000 : 0;
-            let baseSpeed = 4 + speedBoost;
-            this.vx = (Math.random() - 0.5) * baseSpeed;
-            this.pulse = 0;
-        }
-
-        update() {
-            this.x += this.vx;
-            if (this.x <= 0 || this.x + this.width >= CANVAS_WIDTH) {
-                this.vx *= -1;
-            }
-            this.pulse += 0.1;
-        }
-
-        draw() {
-            const drawY = this.y - cameraY;
-            const scale = 1 + Math.sin(this.pulse) * 0.05;
-            ctx.save();
-            ctx.translate(this.x + this.width / 2, drawY + this.height / 2);
-            ctx.scale(scale, scale);
-
-            // Corpo do Porco Inimigo (Rosa mais forte)
-            ctx.fillStyle = '#ff80ab';
-            ctx.beginPath();
-            ctx.arc(0, 0, 18, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.strokeStyle = '#c2185b';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-
-            // Orelhas
-            ctx.fillStyle = '#ff80ab';
-            ctx.beginPath();
-            ctx.moveTo(-15, -10);
-            ctx.lineTo(-22, -22);
-            ctx.lineTo(-5, -15);
-            ctx.fill();
-            ctx.stroke();
-
-            ctx.beginPath();
-            ctx.moveTo(15, -10);
-            ctx.lineTo(22, -22);
-            ctx.lineTo(5, -15);
-            ctx.fill();
-            ctx.stroke();
-
-            // Olhos bravos
-            ctx.fillStyle = 'white';
-            ctx.beginPath();
-            ctx.arc(-6, -4, 4, 0, Math.PI * 2);
-            ctx.arc(6, -4, 4, 0, Math.PI * 2);
-            ctx.fill();
-
-            ctx.fillStyle = 'black';
-            ctx.beginPath();
-            ctx.arc(-6, -4, 2, 0, Math.PI * 2);
-            ctx.arc(6, -4, 2, 0, Math.PI * 2);
-            ctx.fill();
-
-            // Sobrancelhas bravas
-            ctx.strokeStyle = 'black';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(-10, -10); ctx.lineTo(-2, -6);
-            ctx.moveTo(10, -10); ctx.lineTo(2, -6);
-            ctx.stroke();
-
-            // Focinho
-            ctx.fillStyle = '#ff4081';
-            ctx.beginPath();
-            ctx.ellipse(0, 5, 8, 5, 0, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.stroke();
-
-            // Pintas do focinho
-            ctx.fillStyle = '#c2185b';
-            ctx.beginPath();
-            ctx.arc(-3, 5, 1.5, 0, Math.PI * 2);
-            ctx.arc(3, 5, 1.5, 0, Math.PI * 2);
-            ctx.fill();
-
-            ctx.restore();
-        }
-    }
 
     function spawnPlatforms() {
         let highestPlatformY = platforms.length > 0 ? platforms[platforms.length - 1].y : CANVAS_HEIGHT;
@@ -873,6 +774,7 @@ window.addEventListener('load', () => {
             card.className = `world-card ${isActive ? 'selected' : ''}`;
 
             const previewColor = `rgb(${world.colors.SKY.r}, ${world.colors.SKY.g}, ${world.colors.SKY.b})`;
+            const priceLabel = world.currency === 'gems' ? `${world.price} gemas` : `${world.price} moedas`;
 
             card.innerHTML = `
                 <div class="world-preview" style="background: ${previewColor}"></div>
@@ -880,7 +782,7 @@ window.addEventListener('load', () => {
                     <span class="skin-name">${world.name}</span>
                     <span class="skin-ability">${lang.specialAbility}</span>
                 </div>
-                <div class="skin-price">${isPurchased ? (isActive ? lang.active : lang.select) : world.price + ' moedas'}</div>
+                <div class="skin-price">${isPurchased ? (isActive ? lang.active : lang.select) : priceLabel}</div>
             `;
 
             card.onclick = () => {
@@ -888,17 +790,34 @@ window.addEventListener('load', () => {
                     activeWorldId = world.id;
                     localStorage.setItem('skyJumpActiveWorld', activeWorldId);
                     renderWorlds();
-                } else if (coins >= world.price) {
-                    coins -= world.price;
-                    purchasedWorlds.push(world.id);
-                    activeWorldId = world.id;
-                    localStorage.setItem('skyJumpCoins', coins);
-                    localStorage.setItem('skyJumpWorlds', JSON.stringify(purchasedWorlds));
-                    localStorage.setItem('skyJumpActiveWorld', activeWorldId);
-                    updateCoinUI();
-                    renderWorlds();
                 } else {
-                    showNotification(lang.errorCoins);
+                    if (world.currency === 'gems') {
+                        if (gems >= world.price) {
+                            gems -= world.price;
+                            purchasedWorlds.push(world.id);
+                            activeWorldId = world.id;
+                            localStorage.setItem('skyJumpGems', gems);
+                            localStorage.setItem('skyJumpWorlds', JSON.stringify(purchasedWorlds));
+                            localStorage.setItem('skyJumpActiveWorld', activeWorldId);
+                            updateGemUI();
+                            renderWorlds();
+                        } else {
+                            showNotification("💎 Gemas insuficientes!");
+                        }
+                    } else {
+                        if (coins >= world.price) {
+                            coins -= world.price;
+                            purchasedWorlds.push(world.id);
+                            activeWorldId = world.id;
+                            localStorage.setItem('skyJumpCoins', coins);
+                            localStorage.setItem('skyJumpWorlds', JSON.stringify(purchasedWorlds));
+                            localStorage.setItem('skyJumpActiveWorld', activeWorldId);
+                            updateCoinUI();
+                            renderWorlds();
+                        } else {
+                            showNotification(lang.errorCoins);
+                        }
+                    }
                 }
             };
             worldListContainer.appendChild(card);
@@ -917,20 +836,7 @@ window.addEventListener('load', () => {
         };
     }
 
-    if (document.getElementById('chest-shop-btn')) {
-        document.getElementById('chest-shop-btn').onclick = () => {
-            if (startScreen) startScreen.classList.add('hidden');
-            document.getElementById('chest-shop-screen').classList.remove('hidden');
-            updateGemUI();
-        };
-    }
 
-    if (document.getElementById('close-chest-shop')) {
-        document.getElementById('close-chest-shop').onclick = () => {
-            document.getElementById('chest-shop-screen').classList.add('hidden');
-            if (startScreen) startScreen.classList.remove('hidden');
-        };
-    }
 
     if (document.getElementById('convert-coins-btn')) {
         document.getElementById('convert-coins-btn').onclick = () => {
@@ -954,7 +860,6 @@ window.addEventListener('load', () => {
                 gems -= 50;
                 localStorage.setItem('skyJumpGems', gems);
                 updateGemUI();
-                document.getElementById('chest-shop-screen').classList.add('hidden');
                 // Ativar o baú sem precisar das chaves
                 triggerRewardChest(true);
             } else {

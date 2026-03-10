@@ -68,7 +68,6 @@
                 <div class="side-buttons-row">
                     <button id="shop-btn-menu" class="btn secondary">Shop</button>
                     <button id="worlds-btn-menu" class="btn secondary">Worlds</button>
-                    <button id="chest-shop-btn" class="btn secondary">📦 Chests</button>
                     <button id="settings-btn-menu" class="btn secondary">⚙️</button>
                 </div>
             </div>
@@ -103,24 +102,6 @@
         <!-- Worlds Screen -->
         <div id="worlds-screen" class="ui-layer hidden">
             <h1 id="worlds-title">Select World</h1>
-            <div id="world-list" class="skin-container">
-                <!-- Worlds will be injected here via JS -->
-            </div>
-            <button id="close-worlds" class="btn secondary">Back to Menu</button>
-        </div>
-
-        <!-- Shop Screen -->
-        <div id="shop-screen" class="ui-layer hidden">
-            <h1 id="shop-title">Mercado de Skins</h1>
-            <div id="skin-list" class="skin-container">
-                <!-- Skins will be injected here via JS -->
-            </div>
-            <button id="close-shop" class="btn secondary">Back to Menu</button>
-        </div>
-
-        <!-- Chest Shop Screen -->
-        <div id="chest-shop-screen" class="ui-layer hidden">
-            <h1 id="chest-shop-title">Loja de Baús</h1>
 
             <div class="menu-currency">
                 <div class="stat-box">
@@ -137,19 +118,22 @@
                 <button id="convert-coins-btn" class="btn-buy-gem">Trocar 100 💰 por 10 💎</button>
             </div>
 
-            <div class="chest-items">
-                <div class="chest-card">
-                    <div class="chest-preview">📦</div>
-                    <div class="chest-info">
-                        <span class="chest-name">Baú Comum</span>
-                        <span class="chest-desc">Sorteie bônus ou moedas!</span>
-                    </div>
-                    <button id="buy-chest-btn" class="btn-buy-chest">Abrir (50 💎)</button>
-                </div>
+            <div id="world-list" class="skin-container">
+                <!-- Worlds will be injected here via JS -->
             </div>
-
-            <button id="close-chest-shop" class="btn secondary">Voltar ao Menu</button>
+            <button id="close-worlds" class="btn secondary">Back to Menu</button>
         </div>
+
+        <!-- Shop Screen -->
+        <div id="shop-screen" class="ui-layer hidden">
+            <h1 id="shop-title">Mercado de Skins</h1>
+            <div id="skin-list" class="skin-container">
+                <!-- Skins will be injected here via JS -->
+            </div>
+            <button id="close-shop" class="btn secondary">Back to Menu</button>
+        </div>
+
+
 
         <!-- Game Over Screen -->
         <div id="game-over-screen" class="ui-layer hidden">
@@ -169,7 +153,7 @@
         <!-- Placeholder for music if added later -->
     </audio>
 
-    <script src="game.js?v=5"></script>
+    <script src="game.js?v=6"></script>
 </body>
 
 </html>
