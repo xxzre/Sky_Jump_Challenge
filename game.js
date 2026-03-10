@@ -230,11 +230,15 @@ window.addEventListener('load', () => {
 
     function updateCoinUI() {
         if (coinDisplay) coinDisplay.textContent = coins;
+        const menuCoinDisplay = document.getElementById('menu-coin-count');
+        if (menuCoinDisplay) menuCoinDisplay.textContent = coins;
     }
 
     function updateGemUI() {
         const gemDisplay = document.getElementById('gem-count');
         if (gemDisplay) gemDisplay.textContent = gems;
+        const menuGemDisplay = document.getElementById('menu-gem-count');
+        if (menuGemDisplay) menuGemDisplay.textContent = gems;
     }
 
     function updateKeyUI() {

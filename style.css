@@ -167,10 +167,21 @@ p {
 .menu-buttons {
     display: flex;
     flex-direction: column;
-    gap: 15px;
-    margin-bottom: 30px;
+    gap: 12px;
+    margin-top: 10px;
     align-items: center;
     width: 100%;
+}
+
+.menu-currency {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 15px;
+    justify-content: center;
+    background: var(--glass);
+    padding: 10px 20px;
+    border-radius: 20px;
+    border: 1px solid var(--glass-border);
 }
 
 .side-buttons-row {
