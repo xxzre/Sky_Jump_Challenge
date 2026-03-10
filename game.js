@@ -128,8 +128,8 @@ window.addEventListener('load', () => {
     const SKINS = [
         { id: 'default', name: 'Porquinho Gay', color: '#ffb6c1', imgSrc: 'assets/Porquinho_Da_Sorte_Gay.png', price: 0, ability: 'Padrão', stats: { gravity: 0, speed: 0, jump: 0, magnet: 40 } },
         { id: 'neon', name: 'Porquinho Preto', color: '#000000ff', imgSrc: 'assets/Porquinho_Da_Sorte_Preto.png', price: 50, ability: '+25% Velocidade', stats: { gravity: 0, speed: 1.5, jump: 0, magnet: 40 } },
-        { id: 'jump', name: 'Porquinho do Bolsonaro', color: '#ffe600ff', imgSrc: 'assets/Porquinho_Da_Sorte_Bolsonarista.png', price: 100, ability: 'Mega Imã + Buff (15% Tudo) + 2x Moedas', stats: { gravity: -0.0525, speed: 0.9, jump: -1.8, magnet: 350 } },
-        { id: 'magnet', name: 'Porquinho Petista', color: '#ff0000ff', imgSrc: 'assets/Porquinho_da_Sorte_PT.png?v=1', price: 150, ability: 'Imã Potente', stats: { gravity: 0, speed: 0, jump: 0, magnet: 250 } },
+        { id: 'jump', name: 'Porquinho do Bolsonaro', color: '#ffe600ff', imgSrc: 'assets/Porquinho_Da_Sorte_Bolsonarista.png', price: 100, ability: 'Imã Infinito + Buff (15% Tudo) + 2x Moedas', stats: { gravity: -0.0525, speed: 0.9, jump: -1.8, magnet: 2000 } },
+        { id: 'magnet', name: 'Porquinho Petista', color: '#ff0000ff', imgSrc: 'assets/Porquinho_da_Sorte_PT.png?v=1', price: 150, ability: 'Imã Infinito', stats: { gravity: 0, speed: 0, jump: 0, magnet: 2000 } },
         { id: 'gravity', name: 'Porquinho Do Bem', color: '#ffffff', imgSrc: 'assets/Porquinho_Da_Sorte_Branco.png', price: 200, ability: '-15% Gravidade', stats: { gravity: -0.05, speed: 0, jump: 0, magnet: 45 } }
     ];
 
@@ -309,6 +309,10 @@ window.addEventListener('load', () => {
             this.hasCoin = (!isFirst && Math.random() < 0.50);
             this.coinCollected = false;
 
+            // Posição individual da moeda para efeito de imã
+            this.coinX = this.x + this.width / 2;
+            this.coinY = y - 15;
+
             // Timer para plataformas que somem (180 frames = ~3 segundos a 60fps)
             this.timer = 0;
             this.visible = true;
@@ -320,6 +324,34 @@ window.addEventListener('load', () => {
                 if (this.timer >= 180) {
                     this.visible = !this.visible;
                     this.timer = 0;
+                }
+            }
+
+            // Efeito de Imã: Se tiver moeda e não foi coletada, puxar para o player
+            if (this.hasCoin && !this.coinCollected && player && gameActive) {
+                const dist = Math.sqrt(
+                    Math.pow((player.x + player.width / 2) - this.coinX, 2) +
+                    Math.pow((player.y + player.height / 2) - this.coinY, 2)
+                );
+
+                if (dist < player.stats.magnet) {
+                    // Puxa a moeda em direção ao player (velocidade aumenta com a proximidade)
+                    const angle = Math.atan2((player.y + player.height / 2) - this.coinY, (player.x + player.width / 2) - this.coinX);
+                    const speed = 12;
+                    this.coinX += Math.cos(angle) * speed;
+                    this.coinY += Math.sin(angle) * speed;
+
+                    // Se encostar no player, coleta de verdade
+                    if (dist < 30) {
+                        this.coinCollected = true;
+                        // No novo mundo (neon), moedas valem 5
+                        let coinValue = (activeWorldId === 'neon') ? 5 : 1;
+                        if (activeSkinId === 'jump') coinValue *= 2;
+
+                        coins += coinValue;
+                        updateCoinUI();
+                        localStorage.setItem('skyJumpCoins', coins);
+                    }
                 }
             }
         }
@@ -351,9 +383,10 @@ window.addEventListener('load', () => {
             }
 
             if (this.hasCoin && !this.coinCollected) {
+                const coinDrawY = this.coinY - cameraY;
                 ctx.fillStyle = '#ffd700';
                 ctx.beginPath();
-                ctx.arc(this.x + this.width / 2, drawY - 15, 8, 0, Math.PI * 2);
+                ctx.arc(this.coinX, coinDrawY, 8, 0, Math.PI * 2);
                 ctx.fill();
                 // Bordas da moeda
                 ctx.strokeStyle = '#b8860b';
@@ -479,33 +512,7 @@ window.addEventListener('load', () => {
             });
         }
 
-        // Colisões com moedas e inimigos
-        platforms.forEach(p => {
-            if (p.hasCoin && !p.coinCollected) {
-                const coinX = p.x + p.width / 2;
-                const coinY = p.y - 15;
-                const dist = Math.sqrt(
-                    Math.pow((player.x + player.width / 2) - coinX, 2) +
-                    Math.pow((player.y + player.height / 2) - coinY, 2)
-                );
-
-                if (dist < player.stats.magnet) {
-                    p.coinCollected = true;
-                    // No novo mundo (neon), moedas valem 5
-                    let coinValue = (activeWorldId === 'neon') ? 5 : 1;
-
-                    // Dobra as moedas se estiver usando o Bolsonaro
-                    if (activeSkinId === 'jump') {
-                        coinValue *= 2;
-                    }
-
-                    coins += coinValue;
-                    updateCoinUI();
-                    localStorage.setItem('skyJumpCoins', coins);
-                }
-            }
-        });
-
+        // Colisões com inimigos e queda
         enemies.forEach(e => {
             const distX = Math.abs((player.x + player.width / 2) - (e.x + e.width / 2));
             const distY = Math.abs((player.y + player.height / 2) - (e.y + e.height / 2));
