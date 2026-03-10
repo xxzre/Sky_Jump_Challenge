@@ -341,6 +341,8 @@ window.addEventListener('load', () => {
             }
         }
     }
+    const enemyImg = new Image();
+    enemyImg.src = 'assets/Porquinho_Da_Sorte_Gay.png';
 
     class Enemy {
         constructor(y, currentScore) {
@@ -363,10 +365,15 @@ window.addEventListener('load', () => {
             ctx.save();
             ctx.translate(this.x + this.width / 2, drawY + this.height / 2);
             ctx.scale(s, s);
-            ctx.fillStyle = '#ff80ab';
-            ctx.beginPath();
-            ctx.arc(0, 0, 18, 0, Math.PI * 2);
-            ctx.fill();
+
+            if (enemyImg.complete && enemyImg.naturalWidth > 0) {
+                ctx.drawImage(enemyImg, -this.width / 2, -this.height / 2, this.width, this.height);
+            } else {
+                ctx.fillStyle = '#ff80ab';
+                ctx.beginPath();
+                ctx.arc(0, 0, 18, 0, Math.PI * 2);
+                ctx.fill();
+            }
             ctx.restore();
         }
     }
