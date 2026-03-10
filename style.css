@@ -173,8 +173,90 @@ p {
 
 .side-buttons-row {
     display: flex;
+    gap: 8px;
+    width: 250px;
+}
+
+.lang-selector {
+    display: flex;
     gap: 10px;
-    width: 200px;
+    margin-bottom: 25px;
+}
+
+.lang-btn {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    color: #fff;
+    padding: 6px 15px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-family: var(--font-main);
+    transition: all 0.2s;
+}
+
+.lang-btn.active {
+    background: var(--primary);
+    border-color: var(--primary-light);
+    box-shadow: 0 0 10px var(--primary-light);
+}
+
+.settings-content {
+    width: 80%;
+    background: var(--glass);
+    padding: 20px;
+    border-radius: 15px;
+    border: 1px solid var(--glass-border);
+    margin-bottom: 25px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.settings-item {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    text-align: left;
+}
+
+.settings-item span {
+    font-weight: 700;
+    opacity: 0.9;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.key-mapping {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.key-mapping>div {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.key-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--glass-border);
+    color: var(--accent);
+    padding: 5px 12px;
+    border-radius: 8px;
+    font-family: inherit;
+    font-weight: 800;
+    cursor: pointer;
+    min-width: 40px;
+    text-align: center;
+}
+
+input[type="range"] {
+    width: 100%;
+    cursor: pointer;
+    accent-color: var(--primary-light);
 }
 
 .side-buttons-row .btn {

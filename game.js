@@ -18,14 +18,102 @@ window.addEventListener('load', () => {
     const closeShopButton = document.getElementById('close-shop');
     const restartButton = document.getElementById('restart-button');
     const menuButton = document.getElementById('menu-button');
-    const worldsButton = document.getElementById('worlds-button');
+    const worldsButton = document.getElementById('worlds-btn-menu');
     const worldsScreen = document.getElementById('worlds-screen');
     const closeWorldsButton = document.getElementById('close-worlds');
     const worldListContainer = document.getElementById('world-list');
+    const settingsButton = document.getElementById('settings-btn-menu');
+    const settingsScreen = document.getElementById('settings-screen');
+    const closeSettingsButton = document.getElementById('close-settings');
+    const volumeControl = document.getElementById('volume-control');
+    const mapLeftBtn = document.getElementById('map-left');
+    const mapRightBtn = document.getElementById('map-right');
     const coinDisplay = document.getElementById('coin-count');
     const notification = document.getElementById('notification');
     const skinListContainer = document.getElementById('skin-list');
     const bgMusic = document.getElementById('bg-music');
+
+    // Elementos de Tradução
+    const uiElements = {
+        title: document.querySelector('.floating'),
+        startBtn: document.getElementById('start-btn'),
+        shopBtn: document.getElementById('shop-btn-menu'),
+        worldsBtn: document.getElementById('worlds-btn-menu'),
+        bestLabel: document.getElementById('best-label'),
+        settingsTitle: document.getElementById('settings-title'),
+        volumeLabel: document.getElementById('volume-label'),
+        controlsLabel: document.getElementById('controls-label'),
+        leftLabel: document.getElementById('left-label'),
+        rightLabel: document.getElementById('right-label'),
+        closeSettingsBtn: document.getElementById('close-settings'),
+        worldsTitle: document.getElementById('worlds-title'),
+        closeWorldsBtn: document.getElementById('close-worlds'),
+        shopTitle: document.getElementById('shop-title'),
+        closeShopBtn: document.getElementById('close-shop'),
+        gameOverTitle: document.querySelector('#game-over-screen h1'),
+        restartBtn: document.getElementById('restart-button'),
+        menuBtn: document.getElementById('menu-button')
+    };
+
+    const TRANSLATIONS = {
+        pt: {
+            title: 'Escalada no Dinheiro',
+            startBtn: 'Jogar Agora',
+            shopBtn: 'Loja',
+            worldsBtn: 'Mundos',
+            bestLabel: 'Melhor',
+            settingsTitle: 'Configurações',
+            volumeLabel: 'Volume',
+            controlsLabel: 'Controles',
+            leftLabel: 'Esquerda',
+            rightLabel: 'Direita',
+            closeSettingsBtn: 'Voltar',
+            worldsTitle: 'Selecionar Mundo',
+            closeWorldsBtn: 'Voltar',
+            shopTitle: 'Mercado de Skins',
+            closeShopBtn: 'Voltar',
+            gameOverTitle: 'Fim de Jogo',
+            restartBtn: 'Novo Vôo',
+            menuBtn: 'Menu Principal',
+            active: 'Ativo',
+            select: 'Selecionar',
+            errorCoins: '💰 Erro, Moedas insuficiente',
+            pressKey: 'Pressione...',
+            specialAbility: 'Tema Visual Especial'
+        },
+        en: {
+            title: 'Money Climb',
+            startBtn: 'Play Now',
+            shopBtn: 'Shop',
+            worldsBtn: 'Worlds',
+            bestLabel: 'Best',
+            settingsTitle: 'Settings',
+            volumeLabel: 'Volume',
+            controlsLabel: 'Controls',
+            leftLabel: 'Left',
+            rightLabel: 'Right',
+            closeSettingsBtn: 'Back',
+            worldsTitle: 'Select World',
+            closeWorldsBtn: 'Back',
+            shopTitle: 'Skin Market',
+            closeShopBtn: 'Back',
+            gameOverTitle: 'Game Over',
+            restartBtn: 'New Flight',
+            menuBtn: 'Main Menu',
+            active: 'Active',
+            select: 'Select',
+            errorCoins: '💰 Error, Not enough coins',
+            pressKey: 'Press key...',
+            specialAbility: 'Special Visual Theme'
+        }
+    };
+
+    let currentLang = localStorage.getItem('skyJumpLang') || 'pt';
+
+    // Controles Customizados
+    let leftKey = localStorage.getItem('skyJumpKeyLeft') || 'a';
+    let rightKey = localStorage.getItem('skyJumpKeyRight') || 'd';
+    let isMapping = null; // 'left' ou 'right'
 
     // Configurações e Física
     const CANVAS_WIDTH = 400;
@@ -85,9 +173,40 @@ window.addEventListener('load', () => {
     }
 
     // UI Inicial
+    updateLanguageUI();
     if (highScoreValueDisplay) highScoreValueDisplay.textContent = highScore;
     if (highScoreGameDisplay) highScoreGameDisplay.textContent = highScore;
     updateCoinUI();
+
+    function updateLanguageUI() {
+        const lang = TRANSLATIONS[currentLang];
+        if (uiElements.title) uiElements.title.textContent = lang.title;
+        if (uiElements.startBtn) uiElements.startBtn.textContent = lang.startBtn;
+        if (uiElements.shopBtn) uiElements.shopBtn.textContent = lang.shopBtn;
+        if (uiElements.worldsBtn) uiElements.worldsBtn.textContent = lang.worldsBtn;
+        if (uiElements.bestLabel) uiElements.bestLabel.textContent = lang.bestLabel;
+        if (uiElements.settingsTitle) uiElements.settingsTitle.textContent = lang.settingsTitle;
+        if (uiElements.volumeLabel) uiElements.volumeLabel.textContent = lang.volumeLabel;
+        if (uiElements.controlsLabel) uiElements.controlsLabel.textContent = lang.controlsLabel;
+        if (uiElements.leftLabel) uiElements.leftLabel.textContent = lang.leftLabel;
+        if (uiElements.rightLabel) uiElements.rightLabel.textContent = lang.rightLabel;
+        if (uiElements.closeSettingsBtn) uiElements.closeSettingsBtn.textContent = lang.closeSettingsBtn;
+        if (uiElements.worldsTitle) uiElements.worldsTitle.textContent = lang.worldsTitle;
+        if (uiElements.closeWorldsBtn) uiElements.closeWorldsBtn.textContent = lang.closeWorldsBtn;
+        if (uiElements.shopTitle) uiElements.shopTitle.textContent = lang.shopTitle;
+        if (uiElements.closeShopBtn) uiElements.closeShopBtn.textContent = lang.closeShopBtn;
+        if (uiElements.gameOverTitle) uiElements.gameOverTitle.textContent = lang.gameOverTitle;
+        if (uiElements.restartBtn) uiElements.restartBtn.textContent = lang.restartBtn;
+        if (uiElements.menuBtn) uiElements.menuBtn.textContent = lang.menuBtn;
+
+        if (mapLeftBtn) mapLeftBtn.textContent = leftKey.toUpperCase();
+        if (mapRightBtn) mapRightBtn.textContent = rightKey.toUpperCase();
+
+        document.getElementById('btn-pt')?.classList.toggle('active', currentLang === 'pt');
+        document.getElementById('btn-en')?.classList.toggle('active', currentLang === 'en');
+
+        localStorage.setItem('skyJumpLang', currentLang);
+    }
 
     function updateCoinUI() {
         if (coinDisplay) coinDisplay.textContent = coins;
@@ -146,8 +265,11 @@ window.addEventListener('load', () => {
 
         update() {
             const currentSpeed = horizontalSpeed + this.stats.speed;
-            if (keys['ArrowLeft'] || keys['a'] || keys['A']) this.vx = -currentSpeed;
-            else if (keys['ArrowRight'] || keys['d'] || keys['D']) this.vx = currentSpeed;
+            const goLeft = (keys[leftKey] === true) || (keys[leftKey.toUpperCase()] === true) || (keys['ArrowLeft'] === true);
+            const goRight = (keys[rightKey] === true) || (keys[rightKey.toUpperCase()] === true) || (keys['ArrowRight'] === true);
+
+            if (goLeft) this.vx = -currentSpeed;
+            else if (goRight) this.vx = currentSpeed;
             else this.vx *= 0.8;
 
             this.x += this.vx;
@@ -313,13 +435,16 @@ window.addEventListener('load', () => {
         // Surgem após 400 pontos para dar tempo de acostumar
         if (score < 400) return;
 
-        if (enemies.length === 0 || enemies[enemies.length - 1].y > cameraY - 400) {
-            // Chance de spawn aumenta gradativamente após 500 pontos
-            let densityBoost = score > 500 ? (score - 500) / 5000 : 0;
-            const spawnChance = Math.min(0.05 + (score / 8000) + densityBoost, 0.30);
+        const spawnY = cameraY - 150;
+        const minDistance = 400; // Garante que bixos não nasçam grudados
+
+        if (enemies.length === 0 || (enemies[enemies.length - 1].y > spawnY + minDistance)) {
+            // Chance de spawn mais equilibrada
+            let densityBoost = score > 500 ? (score - 500) / 10000 : 0;
+            const spawnChance = Math.min(0.02 + (score / 20000) + densityBoost, 0.15);
 
             if (Math.random() < spawnChance) {
-                enemies.push(new Enemy(cameraY - 150, score));
+                enemies.push(new Enemy(spawnY, score));
             }
         }
 
@@ -482,6 +607,7 @@ window.addEventListener('load', () => {
 
     function renderShop() {
         if (!skinListContainer) return;
+        const lang = TRANSLATIONS[currentLang];
         skinListContainer.innerHTML = '';
         SKINS.forEach(skin => {
             const isPurchased = purchasedSkins.includes(skin.id);
@@ -497,13 +623,15 @@ window.addEventListener('load', () => {
                 previewHTML = `<div class="skin-preview" style="background: ${skin.color}"></div>`;
             }
 
+            const priceText = isPurchased ? (isActive ? lang.active : lang.select) : skin.price + ' moedas';
+
             card.innerHTML = `
                 ${previewHTML}
                 <div class="skin-info">
                     <span class="skin-name">${skin.name}</span>
                     <span class="skin-ability">${skin.ability}</span>
                 </div>
-                <div class="skin-price">${isPurchased ? (isActive ? 'Ativo' : 'Selecionar') : skin.price + ' moedas'}</div>
+                <div class="skin-price">${priceText}</div>
             `;
 
             card.onclick = () => {
@@ -521,7 +649,7 @@ window.addEventListener('load', () => {
                     updateCoinUI();
                     renderShop();
                 } else {
-                    showNotification("💰 Erro, Moedas insuficiente");
+                    showNotification(lang.errorCoins);
                 }
             };
             skinListContainer.appendChild(card);
@@ -530,6 +658,7 @@ window.addEventListener('load', () => {
 
     function renderWorlds() {
         if (!worldListContainer) return;
+        const lang = TRANSLATIONS[currentLang];
         worldListContainer.innerHTML = '';
         WORLDS.forEach(world => {
             const isPurchased = purchasedWorlds.includes(world.id);
@@ -544,9 +673,9 @@ window.addEventListener('load', () => {
                 <div class="world-preview" style="background: ${previewColor}"></div>
                 <div class="skin-info">
                     <span class="skin-name">${world.name}</span>
-                    <span class="skin-ability">Tema Visual Especial</span>
+                    <span class="skin-ability">${lang.specialAbility}</span>
                 </div>
-                <div class="skin-price">${isPurchased ? (isActive ? 'Ativo' : 'Selecionar') : world.price + ' moedas'}</div>
+                <div class="skin-price">${isPurchased ? (isActive ? lang.active : lang.select) : world.price + ' moedas'}</div>
             `;
 
             card.onclick = () => {
@@ -564,7 +693,7 @@ window.addEventListener('load', () => {
                     updateCoinUI();
                     renderWorlds();
                 } else {
-                    showNotification("💰 Erro, Moedas insuficiente");
+                    showNotification(lang.errorCoins);
                 }
             };
             worldListContainer.appendChild(card);
@@ -573,33 +702,86 @@ window.addEventListener('load', () => {
 
     // Configurar Eventos
     if (startButton) startButton.onclick = startGame;
+    if (document.getElementById('start-btn')) document.getElementById('start-btn').onclick = startGame;
     if (restartButton) restartButton.onclick = startGame;
-    if (shopButton) {
-        shopButton.onclick = () => {
+
+    if (document.getElementById('shop-btn-menu')) {
+        document.getElementById('shop-btn-menu').onclick = () => {
             if (startScreen) startScreen.classList.add('hidden');
             if (shopScreen) shopScreen.classList.remove('hidden');
             renderShop();
         };
     }
+
     if (closeShopButton) {
         closeShopButton.onclick = () => {
             if (shopScreen) shopScreen.classList.add('hidden');
             if (startScreen) startScreen.classList.remove('hidden');
         };
     }
-    if (worldsButton) {
-        worldsButton.onclick = () => {
+
+    if (document.getElementById('worlds-btn-menu')) {
+        document.getElementById('worlds-btn-menu').onclick = () => {
             if (startScreen) startScreen.classList.add('hidden');
             if (worldsScreen) worldsScreen.classList.remove('hidden');
             renderWorlds();
         };
     }
+
     if (closeWorldsButton) {
         closeWorldsButton.onclick = () => {
             if (worldsScreen) worldsScreen.classList.add('hidden');
             if (startScreen) startScreen.classList.remove('hidden');
         };
     }
+
+    if (settingsButton) {
+        settingsButton.onclick = () => {
+            if (startScreen) startScreen.classList.add('hidden');
+            if (settingsScreen) settingsScreen.classList.remove('hidden');
+        };
+    }
+
+    if (closeSettingsButton) {
+        closeSettingsButton.onclick = () => {
+            if (settingsScreen) settingsScreen.classList.add('hidden');
+            if (startScreen) startScreen.classList.remove('hidden');
+        };
+    }
+
+    if (volumeControl) {
+        volumeControl.oninput = (e) => {
+            if (bgMusic) bgMusic.volume = e.target.value;
+        };
+    }
+
+    if (mapLeftBtn) {
+        mapLeftBtn.onclick = () => {
+            isMapping = 'left';
+            mapLeftBtn.textContent = TRANSLATIONS[currentLang].pressKey;
+        };
+    }
+
+    if (mapRightBtn) {
+        mapRightBtn.onclick = () => {
+            isMapping = 'right';
+            mapRightBtn.textContent = TRANSLATIONS[currentLang].pressKey;
+        };
+    }
+
+    document.getElementById('btn-pt').onclick = () => {
+        currentLang = 'pt';
+        updateLanguageUI();
+        renderShop();
+        renderWorlds();
+    };
+
+    document.getElementById('btn-en').onclick = () => {
+        currentLang = 'en';
+        updateLanguageUI();
+        renderShop();
+        renderWorlds();
+    };
     if (menuButton) {
         menuButton.onclick = () => {
             if (gameOverScreen) gameOverScreen.classList.add('hidden');
@@ -619,7 +801,22 @@ window.addEventListener('load', () => {
         if (player) player.vx = 0;
     };
 
-    window.addEventListener('keydown', (e) => keys[e.key] = true);
+    window.addEventListener('keydown', (e) => {
+        if (isMapping) {
+            const key = e.key.toLowerCase();
+            if (isMapping === 'left') {
+                leftKey = key;
+                localStorage.setItem('skyJumpKeyLeft', key);
+            } else {
+                rightKey = key;
+                localStorage.setItem('skyJumpKeyRight', key);
+            }
+            isMapping = null;
+            updateLanguageUI();
+            return;
+        }
+        keys[e.key] = true;
+    });
     window.addEventListener('keyup', (e) => keys[e.key] = false);
 
     // DESATIVAÇÃO TOTAL DO MOUSE/TOUCH PARA MOVIMENTO

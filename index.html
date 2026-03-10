@@ -35,20 +35,50 @@
         <!-- Start Screen -->
         <div id="start-screen" class="ui-layer">
             <h1 class="floating">Escalada no Dinheiro</h1>
-            <p>O lucro não tem limites</p>
+            <div id="lang-selector" class="lang-selector">
+                <button id="btn-pt" class="lang-btn active">🇧🇷 PT</button>
+                <button id="btn-en" class="lang-btn">🇺🇸 EN</button>
+            </div>
+
             <div class="menu-buttons">
-                <button id="start-button" class="btn">Play Now</button>
+                <button id="start-btn" class="btn">Play Now</button>
                 <div class="side-buttons-row">
-                    <button id="shop-button" class="btn secondary">Shop</button>
-                    <button id="worlds-button" class="btn secondary">Worlds</button>
+                    <button id="shop-btn-menu" class="btn secondary">Shop</button>
+                    <button id="worlds-btn-menu" class="btn secondary">Worlds</button>
+                    <button id="settings-btn-menu" class="btn secondary">⚙️</button>
                 </div>
             </div>
-            <div class="high-score-label">Best: <span id="high-score-value">0</span></div>
+            <div class="high-score-label"><span id="best-label">Best</span>: <span id="high-score-value">0</span></div>
+        </div>
+
+        <!-- Settings Screen -->
+        <div id="settings-screen" class="ui-layer hidden">
+            <h1 id="settings-title">Settings</h1>
+            <div class="settings-content">
+                <div class="settings-item">
+                    <span id="volume-label">Volume</span>
+                    <input type="range" id="volume-control" min="0" max="1" step="0.1" value="0.5">
+                </div>
+                <div class="settings-item">
+                    <span id="controls-label">Controls</span>
+                    <div class="key-mapping">
+                        <div>
+                            <span id="left-label">Left</span>:
+                            <button id="map-left" class="key-btn">A</button>
+                        </div>
+                        <div>
+                            <span id="right-label">Right</span>:
+                            <button id="map-right" class="key-btn">D</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button id="close-settings" class="btn secondary">Back to Menu</button>
         </div>
 
         <!-- Worlds Screen -->
         <div id="worlds-screen" class="ui-layer hidden">
-            <h1>Select World</h1>
+            <h1 id="worlds-title">Select World</h1>
             <div id="world-list" class="skin-container">
                 <!-- Worlds will be injected here via JS -->
             </div>
@@ -57,7 +87,7 @@
 
         <!-- Shop Screen -->
         <div id="shop-screen" class="ui-layer hidden">
-            <h1>Mercado de Skins</h1>
+            <h1 id="shop-title">Mercado de Skins</h1>
             <div id="skin-list" class="skin-container">
                 <!-- Skins will be injected here via JS -->
             </div>
