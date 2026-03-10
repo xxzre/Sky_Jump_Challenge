@@ -13,8 +13,8 @@ window.addEventListener('load', () => {
     const startScreen = document.getElementById('start-screen');
     const shopScreen = document.getElementById('shop-screen');
     const gameOverScreen = document.getElementById('game-over-screen');
-    const startButton = document.getElementById('start-button');
-    const shopButton = document.getElementById('shop-button');
+    const startButton = document.getElementById('start-btn');
+    const shopButton = document.getElementById('shop-btn-menu');
     const closeShopButton = document.getElementById('close-shop');
     const restartButton = document.getElementById('restart-button');
     const menuButton = document.getElementById('menu-button');
@@ -260,7 +260,7 @@ window.addEventListener('load', () => {
             { type: 'COINS', icon: '💎', value: 250, label: '+250 Moedas' },
             { type: 'COINS', icon: '💰', value: 500, label: '+500 Moedas' },
             { type: 'COINS', icon: '💎', value: 750, label: '+750 Moedas' },
-            { type: 'COINS', icon: '�', value: 1500, label: '+1500 Moedas' }
+            { type: 'COINS', icon: '🤑', value: 1500, label: '+1500 Moedas' }
         ];
 
         // Shuffle rewards
@@ -870,11 +870,10 @@ window.addEventListener('load', () => {
 
     // Configurar Eventos
     if (startButton) startButton.onclick = startGame;
-    if (document.getElementById('start-btn')) document.getElementById('start-btn').onclick = startGame;
     if (restartButton) restartButton.onclick = startGame;
 
-    if (document.getElementById('shop-btn-menu')) {
-        document.getElementById('shop-btn-menu').onclick = () => {
+    if (shopButton) {
+        shopButton.onclick = () => {
             if (startScreen) startScreen.classList.add('hidden');
             if (shopScreen) shopScreen.classList.remove('hidden');
             renderShop();
