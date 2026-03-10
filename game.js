@@ -156,7 +156,7 @@ window.addEventListener('load', () => {
         { id: 'classic', name: 'Mundo Clássico', price: 0, currency: 'coins', colors: { SKY: { r: 135, g: 206, b: 235 }, DEEP: { r: 26, g: 35, b: 126 }, SPACE: { r: 0, g: 0, b: 51 } } },
         { id: 'neon', name: 'Cidade Neon', price: 500, currency: 'coins', colors: { SKY: { r: 40, g: 0, b: 80 }, DEEP: { r: 0, g: 0, b: 30 }, SPACE: { r: 0, g: 0, b: 0 } } },
         { id: 'gold', name: 'Cofre de Ouro', price: 1000, currency: 'coins', colors: { SKY: { r: 218, g: 165, b: 32 }, DEEP: { r: 0, g: 100, b: 0 }, SPACE: { r: 0, g: 0, b: 0 } } },
-        { id: 'diamond', name: 'Mundo de Diamante', price: 500, currency: 'gems', colors: { SKY: { r: 0, g: 229, b: 255 }, DEEP: { r: 0, g: 105, b: 92 }, SPACE: { r: 0, g: 0, b: 0 } } }
+        { id: 'emerald', name: 'Mundo de Esmeralda', price: 500, currency: 'gems', colors: { SKY: { r: 46, g: 204, b: 113 }, DEEP: { r: 39, g: 174, b: 96 }, SPACE: { r: 0, g: 50, b: 20 } } }
     ];
 
     // Estado do Jogo
