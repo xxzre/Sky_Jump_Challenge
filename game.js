@@ -166,8 +166,10 @@ window.addEventListener('load', () => {
     let coinMultiplier = 1.0;
     let speedMultiplier = 1.0;
     let rewardOptions = [];
-    let activeBoosts = []; // Para exibir no layout
+    let activeBoosts = [];
     let animationId = null;
+    let keys = {};
+    let player = null;
 
     // Economia e Skins
     let coins = parseInt(localStorage.getItem('skyJumpCoins')) || 0;
@@ -727,14 +729,12 @@ window.addEventListener('load', () => {
         canvas.style.background = `rgb(${Math.round(currentColor.r)}, ${Math.round(currentColor.g)}, ${Math.round(currentColor.b)})`;
     }
 
-    let player = null;
+
 
     function gameLoop() {
-        if (!gameActive) return;
-
+        if (!gameActive || !player) return;
         ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-
-        player.update();
+        if (player) player.update();
         spawnPlatforms();
         spawnEnemies();
         checkCollisions();
@@ -754,6 +754,7 @@ window.addEventListener('load', () => {
     }
 
     function startGame() {
+        if (animationId) cancelAnimationFrame(animationId);
         gameActive = true;
         player = new Player();
         score = 0;
@@ -1070,7 +1071,7 @@ window.addEventListener('load', () => {
 
     // DESATIVAÇÃO TOTAL DO MOUSE/TOUCH PARA MOVIMENTO
     const blockEvent = (e) => {
-        if (gameActive) {
+        if (gameActive && e.target === canvas) {
             e.preventDefault();
             e.stopPropagation();
         }
