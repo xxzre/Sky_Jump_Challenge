@@ -149,8 +149,9 @@ window.addEventListener('load', () => {
     let gravity = INITIAL_GRAVITY;
     let horizontalSpeed = INITIAL_HORIZONTAL_SPEED;
     let currentColor = { r: 135, g: 206, b: 235 };
-    let animationId = null;
-    const keys = {};
+    let keysCount = 0;
+    let boostMultiplier = 1.0;
+    let rewardOptions = [];
 
     // Economia e Skins
     let coins = parseInt(localStorage.getItem('skyJumpCoins')) || 0;
@@ -211,6 +212,70 @@ window.addEventListener('load', () => {
 
     function updateCoinUI() {
         if (coinDisplay) coinDisplay.textContent = coins;
+    }
+
+    function updateKeyUI() {
+        const keyCountLabel = document.getElementById('key-count');
+        if (keyCountLabel) keyCountLabel.textContent = keysCount;
+    }
+
+    function triggerRewardChest() {
+        gameActive = false;
+        if (animationId) cancelAnimationFrame(animationId);
+
+        const rewardScreen = document.getElementById('reward-chest-screen');
+        rewardScreen.classList.remove('hidden');
+
+        const slots = document.querySelectorAll('.reward-slot');
+        const possibleRewards = [
+            { type: 'BOOST', icon: '🚀', value: 1.30, label: 'Super Boost (Jumps +30%)' }, // O item de boost especial
+            { type: 'COINS', icon: '💰', value: 100, label: '+100 Moedas' },
+            { type: 'COINS', icon: '�', value: 250, label: '+250 Moedas' },
+            { type: 'COINS', icon: '💰', value: 500, label: '+500 Moedas' },
+            { type: 'COINS', icon: '💎', value: 750, label: '+750 Moedas' },
+            { type: 'COINS', icon: '�', value: 1500, label: '+1500 Moedas' }
+        ];
+
+        // Shuffle rewards
+        rewardOptions = possibleRewards.sort(() => Math.random() - 0.5);
+
+        slots.forEach((slot, index) => {
+            slot.textContent = '?';
+            slot.classList.remove('revealed');
+            slot.onclick = () => {
+                const reward = rewardOptions[index];
+                slot.textContent = reward.icon;
+                slot.classList.add('revealed');
+
+                applyReward(reward);
+
+                setTimeout(() => {
+                    rewardScreen.classList.add('hidden');
+                    keysCount = 0;
+                    updateKeyUI();
+                    gameActive = true;
+                    gameLoop();
+                }, 1500);
+            };
+        });
+    }
+
+    function applyReward(reward) {
+        if (reward.type === 'BOOST') {
+            boostMultiplier *= reward.value;
+        } else if (reward.type === 'COINS') {
+            coins += reward.value;
+            updateCoinUI();
+        } else if (reward.type === 'SCORE') {
+            score += reward.value;
+            if (scoreValueDisplay) scoreValueDisplay.textContent = score;
+        } else if (reward.type === 'GRAVITY') {
+            INITIAL_GRAVITY += reward.value; // permanent decrease
+        } else if (reward.type === 'MAGNET') {
+            SKINS.forEach(s => s.stats.magnet += reward.value);
+        }
+        showNotification(`Premio: ${reward.label}!`);
+        localStorage.setItem('skyJumpCoins', coins);
     }
 
     function showNotification(message) {
@@ -286,7 +351,7 @@ window.addEventListener('load', () => {
         }
 
         jump(multiplier = 1) {
-            this.vy = (JUMP_FORCE + this.stats.jump) * multiplier;
+            this.vy = (JUMP_FORCE + this.stats.jump) * multiplier * boostMultiplier;
         }
     }
 
@@ -308,11 +373,13 @@ window.addEventListener('load', () => {
             }
 
             this.hasCoin = (!isFirst && Math.random() < 0.50);
+            this.hasKey = (!isFirst && !this.hasCoin && Math.random() < 0.15); // 15% de chance de chave se não tiver moeda
             this.coinCollected = false;
+            this.keyCollected = false;
 
-            // Posição individual da moeda para efeito de imã
-            this.coinX = this.x + this.width / 2;
-            this.coinY = y - 15;
+            // Posição individual da moeda/chave para efeito de imã
+            this.itemX = this.x + this.width / 2;
+            this.itemY = y - 15;
 
             // Timer para plataformas que somem (180 frames = ~3 segundos a 60fps)
             this.timer = 0;
@@ -328,32 +395,37 @@ window.addEventListener('load', () => {
                 }
             }
 
-            // Efeito de Imã: Se tiver moeda e não foi coletada, puxar para o player
-            if (this.hasCoin && !this.coinCollected && player && gameActive) {
+            // Efeito de Imã: Se tiver item e não foi coletado, puxar para o player
+            const hasActiveItem = (this.hasCoin && !this.coinCollected) || (this.hasKey && !this.keyCollected);
+            if (hasActiveItem && player && gameActive) {
                 const dist = Math.sqrt(
-                    Math.pow((player.x + player.width / 2) - this.coinX, 2) +
-                    Math.pow((player.y + player.height / 2) - this.coinY, 2)
+                    Math.pow((player.x + player.width / 2) - this.itemX, 2) +
+                    Math.pow((player.y + player.height / 2) - this.itemY, 2)
                 );
 
                 if (dist < player.stats.magnet) {
-                    // Puxa a moeda em direção ao player (velocidade aumenta com a proximidade)
-                    const angle = Math.atan2((player.y + player.height / 2) - this.coinY, (player.x + player.width / 2) - this.coinX);
+                    const angle = Math.atan2((player.y + player.height / 2) - this.itemY, (player.x + player.width / 2) - this.itemX);
                     const speed = 12;
-                    this.coinX += Math.cos(angle) * speed;
-                    this.coinY += Math.sin(angle) * speed;
+                    this.itemX += Math.cos(angle) * speed;
+                    this.itemY += Math.sin(angle) * speed;
 
-                    // Se encostar no player, coleta de verdade
                     if (dist < 30) {
-                        this.coinCollected = true;
-                        // Valor das moedas baseado no mundo
-                        let coinValue = 1;
-                        if (activeWorldId === 'neon') coinValue = 5;
-                        if (activeWorldId === 'gold') coinValue = 20; // O Cofre de Ouro paga 20x mais!
-
-                        if (activeSkinId === 'jump') coinValue *= 2;
-
-                        coins += coinValue;
-                        updateCoinUI();
+                        if (this.hasCoin && !this.coinCollected) {
+                            this.coinCollected = true;
+                            let coinValue = 1;
+                            if (activeWorldId === 'neon') coinValue = 5;
+                            if (activeWorldId === 'gold') coinValue = 20;
+                            if (activeSkinId === 'jump') coinValue *= 2;
+                            coins += coinValue;
+                            updateCoinUI();
+                        } else if (this.hasKey && !this.keyCollected) {
+                            this.keyCollected = true;
+                            keysCount++;
+                            updateKeyUI();
+                            if (keysCount >= 3) {
+                                triggerRewardChest();
+                            }
+                        }
                         localStorage.setItem('skyJumpCoins', coins);
                     }
                 }
@@ -387,15 +459,19 @@ window.addEventListener('load', () => {
             }
 
             if (this.hasCoin && !this.coinCollected) {
-                const coinDrawY = this.coinY - cameraY;
+                const coinDrawY = this.itemY - cameraY;
                 ctx.fillStyle = '#ffd700';
                 ctx.beginPath();
-                ctx.arc(this.coinX, coinDrawY, 8, 0, Math.PI * 2);
+                ctx.arc(this.itemX, coinDrawY, 8, 0, Math.PI * 2);
                 ctx.fill();
-                // Bordas da moeda
                 ctx.strokeStyle = '#b8860b';
                 ctx.lineWidth = 1;
                 ctx.stroke();
+            } else if (this.hasKey && !this.keyCollected) {
+                const keyDrawY = this.itemY - cameraY;
+                ctx.font = '20px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('🔑', this.itemX, keyDrawY + 7);
             }
         }
     }
