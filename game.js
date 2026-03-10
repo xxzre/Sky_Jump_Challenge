@@ -128,14 +128,14 @@ window.addEventListener('load', () => {
     const SKINS = [
         { id: 'default', name: 'Porquinho Gay', color: '#ffb6c1', imgSrc: 'assets/Porquinho_Da_Sorte_Gay.png', price: 0, ability: 'Padrão', stats: { gravity: 0, speed: 0, jump: 0, magnet: 40 } },
         { id: 'neon', name: 'Porquinho Preto', color: '#000000ff', imgSrc: 'assets/Porquinho_Da_Sorte_Preto.png', price: 50, ability: '+25% Velocidade', stats: { gravity: 0, speed: 1.5, jump: 0, magnet: 40 } },
-        { id: 'jump', name: 'Porquinho do Bolsonaro', color: '#ffe600ff', imgSrc: 'assets/Porquinho_Da_Sorte_Bolsonarista.png', price: 100, ability: 'Super Buff (+15% Tudo)', stats: { gravity: -0.0525, speed: 0.9, jump: -1.8, magnet: 46 } },
+        { id: 'jump', name: 'Porquinho do Bolsonaro', color: '#ffe600ff', imgSrc: 'assets/Porquinho_Da_Sorte_Bolsonarista.png', price: 100, ability: 'Buff (15% Tudo) + 2x Moedas', stats: { gravity: -0.0525, speed: 0.9, jump: -1.8, magnet: 46 } },
         { id: 'magnet', name: 'Porquinho Petista', color: '#ff0000ff', imgSrc: 'assets/Porquinho_da_Sorte_PT.png?v=1', price: 150, ability: 'Imã Potente', stats: { gravity: 0, speed: 0, jump: 0, magnet: 120 } },
         { id: 'gravity', name: 'Porquinho Do Bem', color: '#ffffff', imgSrc: 'assets/Porquinho_Da_Sorte_Branco.png', price: 200, ability: '-15% Gravidade', stats: { gravity: -0.05, speed: 0, jump: 0, magnet: 45 } }
     ];
 
     const WORLDS = [
         { id: 'classic', name: 'Mundo Clássico', price: 0, colors: { SKY: { r: 135, g: 206, b: 235 }, DEEP: { r: 26, g: 35, b: 126 }, SPACE: { r: 0, g: 0, b: 51 } } },
-        { id: 'neon', name: 'Cidade Neon', price: 1000, colors: { SKY: { r: 40, g: 0, b: 80 }, DEEP: { r: 0, g: 0, b: 30 }, SPACE: { r: 0, g: 0, b: 0 } } }
+        { id: 'neon', name: 'Cidade Neon', price: 500, colors: { SKY: { r: 40, g: 0, b: 80 }, DEEP: { r: 0, g: 0, b: 30 }, SPACE: { r: 0, g: 0, b: 0 } } }
     ];
 
     // Estado do Jogo
@@ -306,7 +306,7 @@ window.addEventListener('load', () => {
                 this.type = 'NORMAL';
             }
 
-            this.hasCoin = (!isFirst && this.type === 'NORMAL' && Math.random() < 0.25);
+            this.hasCoin = (!isFirst && Math.random() < 0.50);
             this.coinCollected = false;
 
             // Timer para plataformas que somem (180 frames = ~3 segundos a 60fps)
@@ -492,7 +492,13 @@ window.addEventListener('load', () => {
                 if (dist < player.stats.magnet) {
                     p.coinCollected = true;
                     // No novo mundo (neon), moedas valem 5
-                    const coinValue = (activeWorldId === 'neon') ? 5 : 1;
+                    let coinValue = (activeWorldId === 'neon') ? 5 : 1;
+
+                    // Dobra as moedas se estiver usando o Bolsonaro
+                    if (activeSkinId === 'jump') {
+                        coinValue *= 2;
+                    }
+
                     coins += coinValue;
                     updateCoinUI();
                     localStorage.setItem('skyJumpCoins', coins);

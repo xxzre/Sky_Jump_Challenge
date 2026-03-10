@@ -169,18 +169,23 @@ p {
     flex-direction: column;
     gap: 15px;
     margin-bottom: 30px;
+    align-items: center;
+    width: 100%;
 }
 
 .side-buttons-row {
     display: flex;
     gap: 8px;
-    width: 250px;
+    width: 100%;
+    max-width: 320px;
+    justify-content: center;
 }
 
 .lang-selector {
     display: flex;
     gap: 10px;
     margin-bottom: 25px;
+    justify-content: center;
 }
 
 .lang-btn {
