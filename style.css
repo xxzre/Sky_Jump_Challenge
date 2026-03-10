@@ -442,8 +442,69 @@ input[type="range"] {
     border-color: var(--primary-light);
 }
 
-.reward-slot.revealed {
-    background: var(--primary);
-    border-color: white;
-    box-shadow: 0 0 20px var(--primary-light);
+.gem-icon {
+    font-size: 1.2rem;
+    color: #00ff22;
+    text-shadow: 0 0 10px #00ff22;
+}
+
+.gem-conversion {
+    margin-bottom: 25px;
+    width: 90%;
+}
+
+.btn-buy-gem {
+    background: linear-gradient(135deg, #4caf50, #00C853);
+    border: none;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 12px;
+    font-weight: 800;
+    cursor: pointer;
+    width: 100%;
+}
+
+.chest-items {
+    width: 90%;
+    margin-bottom: 30px;
+}
+
+.chest-card {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    border-radius: 15px;
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.chest-preview {
+    font-size: 2.5rem;
+}
+
+.chest-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+}
+
+.chest-name {
+    font-weight: 800;
+}
+
+.chest-desc {
+    font-size: 0.8rem;
+    opacity: 0.7;
+}
+
+.btn-buy-chest {
+    background: #00ff22;
+    border: none;
+    color: black;
+    padding: 8px 15px;
+    border-radius: 8px;
+    font-weight: 800;
+    cursor: pointer;
 }

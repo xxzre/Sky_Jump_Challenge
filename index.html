@@ -24,6 +24,10 @@
                 <div class="coin-icon"></div>
                 <span id="coin-count">0</span>
             </div>
+            <div class="stat-box">
+                <div class="gem-icon">💎</div>
+                <span id="gem-count">0</span>
+            </div>
             <div class="stat-box" id="key-stat-box">
                 <div class="key-icon">🔑</div>
                 <span id="key-count">0</span>/3
@@ -63,6 +67,7 @@
                 <div class="side-buttons-row">
                     <button id="shop-btn-menu" class="btn secondary">Shop</button>
                     <button id="worlds-btn-menu" class="btn secondary">Worlds</button>
+                    <button id="chest-shop-btn" class="btn secondary">📦 Chests</button>
                     <button id="settings-btn-menu" class="btn secondary">⚙️</button>
                 </div>
             </div>
@@ -110,6 +115,28 @@
                 <!-- Skins will be injected here via JS -->
             </div>
             <button id="close-shop" class="btn secondary">Back to Menu</button>
+        </div>
+
+        <!-- Chest Shop Screen -->
+        <div id="chest-shop-screen" class="ui-layer hidden">
+            <h1 id="chest-shop-title">Loja de Baús</h1>
+
+            <div class="gem-conversion">
+                <button id="convert-coins-btn" class="btn-buy-gem">Trocar 100 💰 por 10 💎</button>
+            </div>
+
+            <div class="chest-items">
+                <div class="chest-card">
+                    <div class="chest-preview">📦</div>
+                    <div class="chest-info">
+                        <span class="chest-name">Baú Comum</span>
+                        <span class="chest-desc">Sorteie bônus ou moedas!</span>
+                    </div>
+                    <button id="buy-chest-btn" class="btn-buy-chest">Abrir (50 💎)</button>
+                </div>
+            </div>
+
+            <button id="close-chest-shop" class="btn secondary">Voltar ao Menu</button>
         </div>
 
         <!-- Game Over Screen -->

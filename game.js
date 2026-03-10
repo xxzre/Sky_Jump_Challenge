@@ -50,6 +50,10 @@ window.addEventListener('load', () => {
         closeWorldsBtn: document.getElementById('close-worlds'),
         shopTitle: document.getElementById('shop-title'),
         closeShopBtn: document.getElementById('close-shop'),
+        chestShopTitle: document.getElementById('chest-shop-title'),
+        convertBtn: document.getElementById('convert-coins-btn'),
+        buyChestBtn: document.getElementById('buy-chest-btn'),
+        closeChestShopBtn: document.getElementById('close-chest-shop'),
         gameOverTitle: document.querySelector('#game-over-screen h1'),
         restartBtn: document.getElementById('restart-button'),
         menuBtn: document.getElementById('menu-button')
@@ -72,6 +76,10 @@ window.addEventListener('load', () => {
             closeWorldsBtn: 'Voltar',
             shopTitle: 'Mercado de Skins',
             closeShopBtn: 'Voltar',
+            chestShopTitle: 'Loja de Baús',
+            convertBtn: 'Trocar 100 💰 por 10 💎',
+            buyChestBtn: 'Abrir (50 💎)',
+            closeChestShopBtn: 'Voltar',
             gameOverTitle: 'Fim de Jogo',
             restartBtn: 'Novo Vôo',
             menuBtn: 'Menu Principal',
@@ -97,6 +105,10 @@ window.addEventListener('load', () => {
             closeWorldsBtn: 'Back',
             shopTitle: 'Skin Market',
             closeShopBtn: 'Back',
+            chestShopTitle: 'Chest Shop',
+            convertBtn: 'Trade 100 💰 for 10 💎',
+            buyChestBtn: 'Open (50 💎)',
+            closeChestShopBtn: 'Back',
             gameOverTitle: 'Game Over',
             restartBtn: 'New Flight',
             menuBtn: 'Main Menu',
@@ -155,6 +167,7 @@ window.addEventListener('load', () => {
 
     // Economia e Skins
     let coins = parseInt(localStorage.getItem('skyJumpCoins')) || 0;
+    let gems = parseInt(localStorage.getItem('skyJumpGems')) || 0;
     let purchasedSkins = [];
     try {
         purchasedSkins = JSON.parse(localStorage.getItem('skyJumpPurchased')) || ['default'];
@@ -179,6 +192,7 @@ window.addEventListener('load', () => {
     if (highScoreValueDisplay) highScoreValueDisplay.textContent = highScore;
     if (highScoreGameDisplay) highScoreGameDisplay.textContent = highScore;
     updateCoinUI();
+    updateGemUI();
 
     function updateLanguageUI() {
         const lang = TRANSLATIONS[currentLang];
@@ -197,6 +211,10 @@ window.addEventListener('load', () => {
         if (uiElements.closeWorldsBtn) uiElements.closeWorldsBtn.textContent = lang.closeWorldsBtn;
         if (uiElements.shopTitle) uiElements.shopTitle.textContent = lang.shopTitle;
         if (uiElements.closeShopBtn) uiElements.closeShopBtn.textContent = lang.closeShopBtn;
+        if (uiElements.chestShopTitle) uiElements.chestShopTitle.textContent = lang.chestShopTitle;
+        if (uiElements.convertBtn) uiElements.convertBtn.textContent = lang.convertBtn;
+        if (uiElements.buyChestBtn) uiElements.buyChestBtn.textContent = lang.buyChestBtn;
+        if (uiElements.closeChestShopBtn) uiElements.closeChestShopBtn.textContent = lang.closeChestShopBtn;
         if (uiElements.gameOverTitle) uiElements.gameOverTitle.textContent = lang.gameOverTitle;
         if (uiElements.restartBtn) uiElements.restartBtn.textContent = lang.restartBtn;
         if (uiElements.menuBtn) uiElements.menuBtn.textContent = lang.menuBtn;
@@ -214,12 +232,17 @@ window.addEventListener('load', () => {
         if (coinDisplay) coinDisplay.textContent = coins;
     }
 
+    function updateGemUI() {
+        const gemDisplay = document.getElementById('gem-count');
+        if (gemDisplay) gemDisplay.textContent = gems;
+    }
+
     function updateKeyUI() {
         const keyCountLabel = document.getElementById('key-count');
         if (keyCountLabel) keyCountLabel.textContent = keysCount;
     }
 
-    function triggerRewardChest() {
+    function triggerRewardChest(fromShop = false) {
         gameActive = false;
         if (animationId) cancelAnimationFrame(animationId);
 
@@ -230,7 +253,7 @@ window.addEventListener('load', () => {
         const possibleRewards = [
             { type: 'BOOST', icon: '🚀', value: 1.30, label: 'Super Boost (Jumps +30%)' }, // O item de boost especial
             { type: 'COINS', icon: '💰', value: 100, label: '+100 Moedas' },
-            { type: 'COINS', icon: '�', value: 250, label: '+250 Moedas' },
+            { type: 'COINS', icon: '💎', value: 250, label: '+250 Moedas' },
             { type: 'COINS', icon: '💰', value: 500, label: '+500 Moedas' },
             { type: 'COINS', icon: '💎', value: 750, label: '+750 Moedas' },
             { type: 'COINS', icon: '�', value: 1500, label: '+1500 Moedas' }
@@ -251,10 +274,22 @@ window.addEventListener('load', () => {
 
                 setTimeout(() => {
                     rewardScreen.classList.add('hidden');
-                    keysCount = 0;
-                    updateKeyUI();
-                    gameActive = true;
-                    gameLoop();
+                    if (!fromShop) {
+                        keysCount = 0;
+                        updateKeyUI();
+                    }
+                    // Se estiver no menu inicial, não reinicia o loop do jogo
+                    if (gameActive || !startScreen.classList.contains('hidden')) {
+                        // Não faz nada, deixa o usuário no menu
+                    } else {
+                        gameActive = true;
+                        gameLoop();
+                    }
+
+                    // Se veio da loja de baús, volta para lá ou para o menu
+                    if (fromShop) {
+                        if (startScreen) startScreen.classList.remove('hidden');
+                    }
                 }, 1500);
             };
         });
@@ -839,6 +874,52 @@ window.addEventListener('load', () => {
             if (startScreen) startScreen.classList.add('hidden');
             if (shopScreen) shopScreen.classList.remove('hidden');
             renderShop();
+        };
+    }
+
+    if (document.getElementById('chest-shop-btn')) {
+        document.getElementById('chest-shop-btn').onclick = () => {
+            if (startScreen) startScreen.classList.add('hidden');
+            document.getElementById('chest-shop-screen').classList.remove('hidden');
+            updateGemUI();
+        };
+    }
+
+    if (document.getElementById('close-chest-shop')) {
+        document.getElementById('close-chest-shop').onclick = () => {
+            document.getElementById('chest-shop-screen').classList.add('hidden');
+            if (startScreen) startScreen.classList.remove('hidden');
+        };
+    }
+
+    if (document.getElementById('convert-coins-btn')) {
+        document.getElementById('convert-coins-btn').onclick = () => {
+            if (coins >= 100) {
+                coins -= 100;
+                gems += 10;
+                localStorage.setItem('skyJumpCoins', coins);
+                localStorage.setItem('skyJumpGems', gems);
+                updateCoinUI();
+                updateGemUI();
+                showNotification("💎 10 Gemas Recebidas!");
+            } else {
+                showNotification(TRANSLATIONS[currentLang].errorCoins);
+            }
+        };
+    }
+
+    if (document.getElementById('buy-chest-btn')) {
+        document.getElementById('buy-chest-btn').onclick = () => {
+            if (gems >= 50) {
+                gems -= 50;
+                localStorage.setItem('skyJumpGems', gems);
+                updateGemUI();
+                document.getElementById('chest-shop-screen').classList.add('hidden');
+                // Ativar o baú sem precisar das chaves
+                triggerRewardChest(true);
+            } else {
+                showNotification("💎 Gemas insuficientes!");
+            }
         };
     }
 
