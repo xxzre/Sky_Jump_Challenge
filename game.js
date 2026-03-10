@@ -424,35 +424,71 @@ window.addEventListener('load', () => {
 
         draw() {
             const drawY = this.y - cameraY;
-            const scale = 1 + Math.sin(this.pulse) * 0.1;
+            const scale = 1 + Math.sin(this.pulse) * 0.05;
             ctx.save();
             ctx.translate(this.x + this.width / 2, drawY + this.height / 2);
             ctx.scale(scale, scale);
-            ctx.fillStyle = '#9c27b0';
+
+            // Corpo do Porco Inimigo (Rosa mais forte)
+            ctx.fillStyle = '#ff80ab';
             ctx.beginPath();
             ctx.arc(0, 0, 18, 0, Math.PI * 2);
             ctx.fill();
-
-            // Espinhos (novidade do prompt)
-            ctx.strokeStyle = '#4a148c';
+            ctx.strokeStyle = '#c2185b';
             ctx.lineWidth = 2;
-            for (let i = 0; i < 6; i++) {
-                const angle = (i / 6) * Math.PI * 2 + this.pulse * 0.5;
-                ctx.beginPath();
-                ctx.moveTo(Math.cos(angle) * 15, Math.sin(angle) * 15);
-                ctx.lineTo(Math.cos(angle) * 25, Math.sin(angle) * 25);
-                ctx.stroke();
-            }
+            ctx.stroke();
 
-            // Olho vermelho malvado
+            // Orelhas
+            ctx.fillStyle = '#ff80ab';
+            ctx.beginPath();
+            ctx.moveTo(-15, -10);
+            ctx.lineTo(-22, -22);
+            ctx.lineTo(-5, -15);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(15, -10);
+            ctx.lineTo(22, -22);
+            ctx.lineTo(5, -15);
+            ctx.fill();
+            ctx.stroke();
+
+            // Olhos bravos
             ctx.fillStyle = 'white';
             ctx.beginPath();
-            ctx.ellipse(0, -2, 8, 10, 0, 0, Math.PI * 2);
+            ctx.arc(-6, -4, 4, 0, Math.PI * 2);
+            ctx.arc(6, -4, 4, 0, Math.PI * 2);
             ctx.fill();
-            ctx.fillStyle = 'red';
+
+            ctx.fillStyle = 'black';
             ctx.beginPath();
-            ctx.arc(0, -2, 4, 0, Math.PI * 2);
+            ctx.arc(-6, -4, 2, 0, Math.PI * 2);
+            ctx.arc(6, -4, 2, 0, Math.PI * 2);
             ctx.fill();
+
+            // Sobrancelhas bravas
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(-10, -10); ctx.lineTo(-2, -6);
+            ctx.moveTo(10, -10); ctx.lineTo(2, -6);
+            ctx.stroke();
+
+            // Focinho
+            ctx.fillStyle = '#ff4081';
+            ctx.beginPath();
+            ctx.ellipse(0, 5, 8, 5, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            // Pintas do focinho
+            ctx.fillStyle = '#c2185b';
+            ctx.beginPath();
+            ctx.arc(-3, 5, 1.5, 0, Math.PI * 2);
+            ctx.arc(3, 5, 1.5, 0, Math.PI * 2);
+            ctx.fill();
+
             ctx.restore();
         }
     }
