@@ -135,7 +135,8 @@ window.addEventListener('load', () => {
 
     const WORLDS = [
         { id: 'classic', name: 'Mundo Clássico', price: 0, colors: { SKY: { r: 135, g: 206, b: 235 }, DEEP: { r: 26, g: 35, b: 126 }, SPACE: { r: 0, g: 0, b: 51 } } },
-        { id: 'neon', name: 'Cidade Neon', price: 500, colors: { SKY: { r: 40, g: 0, b: 80 }, DEEP: { r: 0, g: 0, b: 30 }, SPACE: { r: 0, g: 0, b: 0 } } }
+        { id: 'neon', name: 'Cidade Neon', price: 500, colors: { SKY: { r: 40, g: 0, b: 80 }, DEEP: { r: 0, g: 0, b: 30 }, SPACE: { r: 0, g: 0, b: 0 } } },
+        { id: 'gold', name: 'Cofre de Ouro', price: 1000, colors: { SKY: { r: 218, g: 165, b: 32 }, DEEP: { r: 0, g: 100, b: 0 }, SPACE: { r: 0, g: 0, b: 0 } } }
     ];
 
     // Estado do Jogo
@@ -344,8 +345,11 @@ window.addEventListener('load', () => {
                     // Se encostar no player, coleta de verdade
                     if (dist < 30) {
                         this.coinCollected = true;
-                        // No novo mundo (neon), moedas valem 5
-                        let coinValue = (activeWorldId === 'neon') ? 5 : 1;
+                        // Valor das moedas baseado no mundo
+                        let coinValue = 1;
+                        if (activeWorldId === 'neon') coinValue = 5;
+                        if (activeWorldId === 'gold') coinValue = 20; // O Cofre de Ouro paga 20x mais!
+
                         if (activeSkinId === 'jump') coinValue *= 2;
 
                         coins += coinValue;
