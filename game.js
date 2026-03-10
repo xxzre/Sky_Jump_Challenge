@@ -341,9 +341,6 @@ window.addEventListener('load', () => {
             }
         }
     }
-    const enemyImg = new Image();
-    enemyImg.src = 'assets/Porquinho_Da_Sorte_Gay.png';
-
     class Enemy {
         constructor(y, currentScore) {
             this.width = 40;
@@ -366,14 +363,44 @@ window.addEventListener('load', () => {
             ctx.translate(this.x + this.width / 2, drawY + this.height / 2);
             ctx.scale(s, s);
 
-            if (enemyImg.complete && enemyImg.naturalWidth > 0) {
-                ctx.drawImage(enemyImg, -this.width / 2, -this.height / 2, this.width, this.height);
-            } else {
-                ctx.fillStyle = '#ff80ab';
-                ctx.beginPath();
-                ctx.arc(0, 0, 18, 0, Math.PI * 2);
-                ctx.fill();
-            }
+            // Orelhas
+            ctx.fillStyle = '#ffb6c1';
+            ctx.beginPath();
+            ctx.arc(-10, -12, 6, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(10, -12, 6, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Cabeça
+            ctx.beginPath();
+            ctx.arc(0, 0, 18, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Focinho
+            ctx.fillStyle = '#ff69b4';
+            ctx.beginPath();
+            ctx.ellipse(0, 5, 8, 5, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Olhos
+            ctx.fillStyle = '#000000';
+            ctx.beginPath();
+            ctx.arc(-6, -3, 2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(6, -3, 2, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Narinas
+            ctx.fillStyle = '#c71585';
+            ctx.beginPath();
+            ctx.arc(-3, 5, 1.5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(3, 5, 1.5, 0, Math.PI * 2);
+            ctx.fill();
+
             ctx.restore();
         }
     }
