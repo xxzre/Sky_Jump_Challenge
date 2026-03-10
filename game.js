@@ -163,6 +163,8 @@ window.addEventListener('load', () => {
     let currentColor = { r: 135, g: 206, b: 235 };
     let keysCount = 0;
     let boostMultiplier = 1.0;
+    let coinMultiplier = 1.0;
+    let speedMultiplier = 1.0;
     let rewardOptions = [];
 
     // Economia e Skins
@@ -255,12 +257,12 @@ window.addEventListener('load', () => {
 
         const slots = document.querySelectorAll('.reward-slot');
         const possibleRewards = [
-            { type: 'BOOST', icon: '🚀', value: 1.30, label: 'Super Boost (Jumps +30%)' }, // O item de boost especial
-            { type: 'COINS', icon: '💰', value: 100, label: '+100 Moedas' },
-            { type: 'COINS', icon: '💎', value: 250, label: '+250 Moedas' },
-            { type: 'COINS', icon: '💰', value: 500, label: '+500 Moedas' },
-            { type: 'COINS', icon: '💎', value: 750, label: '+750 Moedas' },
-            { type: 'COINS', icon: '🤑', value: 1500, label: '+1500 Moedas' }
+            { type: 'BOOST', icon: '🚀', value: 1.25, label: 'Pulo +25%' },
+            { type: 'DOUBLE_COINS', icon: '💰', value: 2, label: 'Moedas 2x' },
+            { type: 'SPEED', icon: '⚡', value: 0.15, label: 'Velocidade +15%' },
+            { type: 'GEMS', icon: '�', value: 20, label: '+20 Gemas' },
+            { type: 'COINS', icon: '🤑', value: 500, label: '+500 Moedas' },
+            { type: 'JUMP_PLUS', icon: '�', value: 1.15, label: 'Super Pulo' }
         ];
 
         // Shuffle rewards
@@ -300,18 +302,19 @@ window.addEventListener('load', () => {
     }
 
     function applyReward(reward) {
-        if (reward.type === 'BOOST') {
+        if (reward.type === 'BOOST' || reward.type === 'JUMP_PLUS') {
             boostMultiplier *= reward.value;
         } else if (reward.type === 'COINS') {
             coins += reward.value;
             updateCoinUI();
-        } else if (reward.type === 'SCORE') {
-            score += reward.value;
-            if (scoreValueDisplay) scoreValueDisplay.textContent = score;
-        } else if (reward.type === 'GRAVITY') {
-            INITIAL_GRAVITY += reward.value; // permanent decrease
-        } else if (reward.type === 'MAGNET') {
-            SKINS.forEach(s => s.stats.magnet += reward.value);
+        } else if (reward.type === 'DOUBLE_COINS') {
+            coinMultiplier *= reward.value;
+        } else if (reward.type === 'SPEED') {
+            speedMultiplier += reward.value;
+        } else if (reward.type === 'GEMS') {
+            gems += reward.value;
+            updateGemUI();
+            localStorage.setItem('skyJumpGems', gems);
         }
         showNotification(`Premio: ${reward.label}!`);
         localStorage.setItem('skyJumpCoins', coins);
@@ -369,7 +372,7 @@ window.addEventListener('load', () => {
         }
 
         update() {
-            const currentSpeed = horizontalSpeed + this.stats.speed;
+            const currentSpeed = (horizontalSpeed + this.stats.speed) * speedMultiplier;
             const goLeft = (keys[leftKey] === true) || (keys[leftKey.toUpperCase()] === true) || (keys['ArrowLeft'] === true);
             const goRight = (keys[rightKey] === true) || (keys[rightKey.toUpperCase()] === true) || (keys['ArrowRight'] === true);
 
@@ -455,6 +458,10 @@ window.addEventListener('load', () => {
                             if (activeWorldId === 'neon') coinValue = 5;
                             if (activeWorldId === 'gold') coinValue = 20;
                             if (activeSkinId === 'jump') coinValue *= 2;
+
+                            // Aplicar Multiplicador de Recompensa
+                            coinValue *= coinMultiplier;
+
                             coins += coinValue;
                             updateCoinUI();
                         } else if (this.hasKey && !this.keyCollected) {
