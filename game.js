@@ -166,6 +166,8 @@ window.addEventListener('load', () => {
     let coinMultiplier = 1.0;
     let speedMultiplier = 1.0;
     let rewardOptions = [];
+    let activeBoosts = []; // Para exibir no layout
+    let animationId = null;
 
     // Economia e Skins
     let coins = parseInt(localStorage.getItem('skyJumpCoins')) || 0;
@@ -243,6 +245,18 @@ window.addEventListener('load', () => {
         if (menuGemDisplay) menuGemDisplay.textContent = gems;
     }
 
+    function updateBoostsHUD() {
+        const hud = document.getElementById('boosts-hud');
+        if (!hud) return;
+        hud.innerHTML = '';
+        activeBoosts.forEach(boost => {
+            const badge = document.createElement('div');
+            badge.className = 'boost-badge';
+            badge.innerHTML = `<span>${boost.icon}</span> <span>${boost.label}</span>`;
+            hud.appendChild(badge);
+        });
+    }
+
     function updateKeyUI() {
         const keyCountLabel = document.getElementById('key-count');
         if (keyCountLabel) keyCountLabel.textContent = keysCount;
@@ -316,6 +330,13 @@ window.addEventListener('load', () => {
             updateGemUI();
             localStorage.setItem('skyJumpGems', gems);
         }
+
+        // Adicionar ao HUD de Boosts (se for um boost acumulável)
+        if (reward.type !== 'COINS' && reward.type !== 'GEMS') {
+            activeBoosts.push(reward);
+            updateBoostsHUD();
+        }
+
         showNotification(`Premio: ${reward.label}!`);
         localStorage.setItem('skyJumpCoins', coins);
     }
@@ -739,6 +760,14 @@ window.addEventListener('load', () => {
         cameraY = 0;
         gravity = INITIAL_GRAVITY;
         horizontalSpeed = INITIAL_HORIZONTAL_SPEED;
+
+        // Resetar Boosts
+        boostMultiplier = 1.0;
+        coinMultiplier = 1.0;
+        speedMultiplier = 1.0;
+        activeBoosts = [];
+        updateBoostsHUD();
+
         platforms = [];
         enemies = [];
 
